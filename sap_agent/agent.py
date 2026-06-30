@@ -22,6 +22,7 @@ from sub_agents.subagent_identity import identity_agent
 from sub_agents.subagent_career import career_agent
 from sub_agents.subagent_payroll import payroll_agent
 from sub_agents.subagent_time import time_agent
+from sub_agents.subagent_employee_info import employee_info_agent
 
 root_agent = LlmAgent(
     model="gemini-2.5-flash",
@@ -47,7 +48,10 @@ root_agent = LlmAgent(
 
         "• time_agent      → leave balance, vacation, sick leave, time off, "
         "timesheet, clock-in, clock-out, recorded hours, planned hours, "
-        "overtime, flexi-time, time collector, allowance, external time data\n\n"
+        "overtime, flexi-time, time collector, allowance, external time data\n"
+
+        "• employee_info_agent → termination details, pension payout, work permits, "
+        "job relationships, hire date changes, person-level termination summary\n\n"
 
         "If a question spans multiple domains (e.g. 'give me my full profile'), "
         "call the relevant subagents sequentially and combine the results into "
