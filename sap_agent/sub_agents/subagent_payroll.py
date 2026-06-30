@@ -10,7 +10,7 @@ Handles: current job details, compensation snapshot,
 
 from google.adk.agents import LlmAgent
 from google.adk.tools import FunctionTool
-from . import tools_payroll_time as pay
+from tools import tools_payroll_time as pay
 
 payroll_agent = LlmAgent(
     model="gemini-2.5-flash",

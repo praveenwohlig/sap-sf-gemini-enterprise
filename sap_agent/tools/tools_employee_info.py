@@ -15,26 +15,21 @@ Field lists match the ECEmploymentInformation OData spec ($select enums).
 ══════════════════════════════════════════════════════════════
 """
 
-import os
-from . import sf_client
-
-HOST    = os.environ["SF_SANDBOX_HOST"]
-API_KEY = os.environ["SF_SANDBOX_API_KEY"]
-USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
+from sap_sf_config import sf_client
 
 
 # ── EmpEmploymentTermination ──────────────────────────────────────────────────
 
-def get_my_employment_termination(user_id: str = USER_ID) -> dict:
+def get_my_employment_termination(user_id: str = None) -> dict:
     """Return the employee's employment termination details (end date, event reason, rehire eligibility, benefit end dates).
 
     Args:
         user_id: Employee user ID to look up. Defaults to the logged-in user.
     """
-    # Composite key: (endDate, personIdExternal, userId) — use collection filter
+    uid = user_id or sf_client.USER_ID
     data = sf_client.odata_get(
-        host=HOST, entity="EmpEmploymentTermination", api_key=API_KEY,
-        filter=f"userId eq '{user_id}'",
+        entity="EmpEmploymentTermination",
+        filter=f"userId eq '{uid}'",
         select=(
             "personIdExternal,userId,endDate,eventReason,"
             "lastDateWorked,okToRehire,regretTermination,"
@@ -49,16 +44,16 @@ def get_my_employment_termination(user_id: str = USER_ID) -> dict:
 
 # ── EmpPensionPayout ──────────────────────────────────────────────────────────
 
-def get_my_pension_payout(user_id: str = USER_ID) -> dict:
+def get_my_pension_payout(user_id: str = None) -> dict:
     """Return the employee's pension payout information (payout schedule, planned end date, payroll end date).
 
     Args:
         user_id: Employee user ID to look up. Defaults to the logged-in user.
     """
-    # Key: userId (single string key)
+    uid = user_id or sf_client.USER_ID
     data = sf_client.odata_get(
-        host=HOST, entity="EmpPensionPayout", api_key=API_KEY,
-        filter=f"userId eq '{user_id}'",
+        entity="EmpPensionPayout",
+        filter=f"userId eq '{uid}'",
         select=(
             "personIdExternal,userId,startDate,endDate,"
             "plannedEndDate,payrollEndDate,lastModifiedDateTime"
@@ -71,7 +66,7 @@ def get_my_pension_payout(user_id: str = USER_ID) -> dict:
 # ── EmpWorkPermit ─────────────────────────────────────────────────────────────
 
 def get_my_work_permits(
-    user_id: str = USER_ID,
+    user_id: str = None,
     country: str = None,
 ) -> dict:
     """Return the employee's work permit records (country, document type/number/title, issue/expiration dates, issuing authority).
@@ -80,13 +75,13 @@ def get_my_work_permits(
         user_id: Employee user ID to look up. Defaults to the logged-in user.
         country: Filter by country code, e.g. 'USA' (optional).
     """
-    # Composite key: (country, documentNumber, documentType, userId)
-    filter_expr = f"userId eq '{user_id}'"
+    uid = user_id or sf_client.USER_ID
+    filter_expr = f"userId eq '{uid}'"
     if country:
         filter_expr += f" and country eq '{country}'"
 
     data = sf_client.odata_get(
-        host=HOST, entity="EmpWorkPermit", api_key=API_KEY,
+        entity="EmpWorkPermit",
         filter=filter_expr,
         select=(
             "userId,country,documentType,documentNumber,documentTitle,"
@@ -101,7 +96,7 @@ def get_my_work_permits(
 # ── EmpJobRelationships ───────────────────────────────────────────────────────
 
 def get_my_job_relationships(
-    user_id: str = USER_ID,
+    user_id: str = None,
     relationship_type: str = None,
 ) -> dict:
     """Return the employee's job relationship records (relationship type, related user ID, effective dates, operation).
@@ -110,13 +105,13 @@ def get_my_job_relationships(
         user_id:           Employee user ID to look up. Defaults to the logged-in user.
         relationship_type: Filter by type, e.g. 'hr manager' (optional).
     """
-    # Composite key: (relationshipType, startDate, userId)
-    filter_expr = f"userId eq '{user_id}'"
+    uid = user_id or sf_client.USER_ID
+    filter_expr = f"userId eq '{uid}'"
     if relationship_type:
         filter_expr += f" and relationshipType eq '{relationship_type}'"
 
     data = sf_client.odata_get(
-        host=HOST, entity="EmpJobRelationships", api_key=API_KEY,
+        entity="EmpJobRelationships",
         filter=filter_expr,
         select=(
             "userId,relationshipType,startDate,endDate,"
@@ -129,16 +124,16 @@ def get_my_job_relationships(
 
 # ── HireDateChange ────────────────────────────────────────────────────────────
 
-def get_my_hire_date_changes(user_id: str = USER_ID) -> dict:
+def get_my_hire_date_changes(user_id: str = None) -> dict:
     """Return the employee's hire date change records (original hire date, new hire date, processing status, record status).
 
     Args:
         user_id: Employee user ID to look up. Defaults to the logged-in user.
     """
-    # Key: code (single string key); filter by usersSysId for per-user lookup
+    uid = user_id or sf_client.USER_ID
     data = sf_client.odata_get(
-        host=HOST, entity="HireDateChange", api_key=API_KEY,
-        filter=f"usersSysId eq '{user_id}'",
+        entity="HireDateChange",
+        filter=f"usersSysId eq '{uid}'",
         select=(
             "code,originalHireDate,newHireDate,processingStatus,"
             "mdfSystemRecordStatus,usersSysId,lastModifiedDateTime"
@@ -150,16 +145,15 @@ def get_my_hire_date_changes(user_id: str = USER_ID) -> dict:
 
 # ── PersonEmpTerminationInfo ──────────────────────────────────────────────────
 
-def get_my_person_emp_termination_info(user_id: str = USER_ID) -> dict:
+def get_my_person_emp_termination_info(user_id: str = None) -> dict:
     """Return the person-level termination summary (active employment count, latest termination date).
 
     Args:
         user_id: Employee's personIdExternal to look up. Defaults to the logged-in user.
     """
-    # Key: personIdExternal (single string key)
+    uid = user_id or sf_client.USER_ID
     data = sf_client.odata_get_single(
-        host=HOST, entity="PersonEmpTerminationInfo", entity_id=user_id,
-        api_key=API_KEY,
+        entity="PersonEmpTerminationInfo", entity_id=uid,
         select=(
             "personIdExternal,activeEmploymentsCount,latestTerminationDate"
         ),

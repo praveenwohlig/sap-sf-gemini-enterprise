@@ -18,11 +18,10 @@ It analyses the intent and delegates to the right specialist.
 from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
 
-from .subagent_identity import identity_agent
-from .subagent_career import career_agent
-from .subagent_payroll import payroll_agent
-from .subagent_time import time_agent
-from tools import tools_employee_profile as emp
+from sub_agents.subagent_identity import identity_agent
+from sub_agents.subagent_career import career_agent
+from sub_agents.subagent_payroll import payroll_agent
+from sub_agents.subagent_time import time_agent
 
 root_agent = LlmAgent(
     model="gemini-2.5-flash",
