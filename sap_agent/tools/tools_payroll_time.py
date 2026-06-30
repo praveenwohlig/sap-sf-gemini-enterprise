@@ -23,12 +23,7 @@ Plus existing EC payroll entities:
 ══════════════════════════════════════════════════════════════
 """
 
-import os
-from . import sf_client
-
-HOST    = os.environ["SF_SANDBOX_HOST"]
-API_KEY = os.environ["SF_SANDBOX_API_KEY"]
-USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
+from sap_sf_config import sf_client
 
 
 # ── Job Info ──────────────────────────────────────────────────────────────────
@@ -36,8 +31,8 @@ USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
 def get_my_job() -> dict:
     """Return the employee's current job info (title, department, pay grade, manager)."""
     data = sf_client.odata_get(
-        host=HOST, entity="EmpJob", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="EmpJob",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "userId,jobTitle,department,location,startDate,emplStatus,"
             "position,jobCode,payGrade,payGroup,managerId,companyId,"
@@ -53,8 +48,8 @@ def get_my_job() -> dict:
 def get_my_compensation() -> dict:
     """Return the employee's compensation snapshot (pay grade, bonus target, benefits eligibility)."""
     data = sf_client.odata_get(
-        host=HOST, entity="EmpCompensation", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="EmpCompensation",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "userId,startDate,endDate,seqNumber,payType,payGrade,payGroup,"
             "bonusTarget,benefitsRate,isEligibleForBenefits,isEligibleForCar,"
@@ -68,8 +63,8 @@ def get_my_compensation() -> dict:
 def get_my_pay_components() -> dict:
     """Return the employee's recurring pay components (base salary, allowances, currency, frequency)."""
     data = sf_client.odata_get(
-        host=HOST, entity="EmpPayCompRecurring", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="EmpPayCompRecurring",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "userId,startDate,endDate,payComponent,payComponentValue,"
             "currency,frequencyCode,seqNumber,lastModifiedDateTime"
@@ -82,8 +77,8 @@ def get_my_pay_components() -> dict:
 def get_my_beneficiaries() -> dict:
     """Return the employee's beneficiary records (benefit type, name, relationship, percentage)."""
     data = sf_client.odata_get(
-        host=HOST, entity="EmpBeneficiary", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="EmpBeneficiary",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "userId,startDate,endDate,benefitType,firstName,lastName,"
             "relationship,percentage,lastModifiedDateTime"
@@ -98,8 +93,8 @@ def get_my_beneficiaries() -> dict:
 def get_my_time_off() -> dict:
     """Return the employee's absence / time-off records (vacation, sick leave, approval status)."""
     data = sf_client.odata_get(
-        host=HOST, entity="EmployeeTime", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="EmployeeTime",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "userId,startDate,endDate,timeType,quantityInDays,"
             "quantityInHours,approvalStatus,deductionQuantity,"
@@ -113,8 +108,8 @@ def get_my_time_off() -> dict:
 def get_my_leave_balance() -> dict:
     """Return the employee's leave account balances (vacation balance, sick leave balance)."""
     data = sf_client.odata_get(
-        host=HOST, entity="TimeAccount", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="TimeAccount",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "userId,timeAccountType,balance,bookingEndDate,"
             "accountClosed,lastModifiedDateTime"
@@ -129,8 +124,8 @@ def get_my_leave_balance() -> dict:
 def get_my_timesheets() -> dict:
     """Return the employee's timesheet headers (period, planned vs recorded hours, approval status)."""
     data = sf_client.odata_get(
-        host=HOST, entity="EmployeeTimeSheet", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="EmployeeTimeSheet",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "externalCode,userId,startDate,endDate,period,"
             "approvalStatus,plannedWorkingTime,plannedWorkingTimeInDays,"
@@ -147,7 +142,7 @@ def get_my_timesheets() -> dict:
 def get_my_timesheet_entries() -> dict:
     """Return the employee's individual timesheet entries (date, time type, start/end time, hours worked)."""
     data = sf_client.odata_get(
-        host=HOST, entity="EmployeeTimeSheetEntry", api_key=API_KEY,
+        entity="EmployeeTimeSheetEntry",
         filter=f"EmployeeTimeSheet_externalCode ne ''",
         select=(
             "externalCode,EmployeeTimeSheet_externalCode,startDate,"
@@ -164,7 +159,7 @@ def get_my_timesheet_entries() -> dict:
 def get_my_time_valuation() -> dict:
     """Return the employee's time valuation results (hours valued, pay type, allowance type, posting target)."""
     data = sf_client.odata_get(
-        host=HOST, entity="EmployeeTimeValuationResult", api_key=API_KEY,
+        entity="EmployeeTimeValuationResult",
         filter=f"EmployeeTimeSheet_externalCode ne ''",
         select=(
             "externalCode,EmployeeTimeSheet_externalCode,bookingDate,"
@@ -180,8 +175,8 @@ def get_my_time_valuation() -> dict:
 def get_my_time_collector() -> dict:
     """Return the employee's time collector balances (overtime bank, flexi-time balance, collector value)."""
     data = sf_client.odata_get(
-        host=HOST, entity="TimeCollector", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="TimeCollector",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "externalCode,userId,timeCollectorType,startDate,endDate,"
             "bookingDate,collectorValue,changeValue,lastModifiedDateTime"
@@ -194,8 +189,8 @@ def get_my_time_collector() -> dict:
 def get_my_time_recordings() -> dict:
     """Return the employee's clock-in/clock-out time recording entries (date, start time, end time, time type)."""
     data = sf_client.odata_get(
-        host=HOST, entity="TimeRecording", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="TimeRecording",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "externalCode,userId,date,startTime,endTime,"
             "physicalStartDate,physicalEndDate,timeType,"
@@ -210,8 +205,8 @@ def get_my_time_recordings() -> dict:
 def get_my_allowance_recordings() -> dict:
     """Return the employee's allowance recordings (on-call, overtime, allowance type, date, value)."""
     data = sf_client.odata_get(
-        host=HOST, entity="AllowanceRecording", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="AllowanceRecording",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "externalCode,userId,date,allowanceType,value,"
             "costCenter,approvalPeriodStatus,pendingCancellation,"
@@ -225,8 +220,8 @@ def get_my_allowance_recordings() -> dict:
 def get_my_external_allowances() -> dict:
     """Return the employee's externally imported allowances (allowance type, date, value, status)."""
     data = sf_client.odata_get(
-        host=HOST, entity="ExternalAllowance", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="ExternalAllowance",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "externalCode,userId,date,allowanceType,value,"
             "costCenter,status,lastModifiedDateTime"
@@ -239,8 +234,8 @@ def get_my_external_allowances() -> dict:
 def get_my_external_time_data() -> dict:
     """Return the employee's externally imported time data (date, time type, hours, start/end time, status)."""
     data = sf_client.odata_get(
-        host=HOST, entity="ExternalTimeData", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="ExternalTimeData",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "externalCode,userId,startDate,endDate,startTime,endTime,"
             "timeType,hours,costCenter,status,category,"
