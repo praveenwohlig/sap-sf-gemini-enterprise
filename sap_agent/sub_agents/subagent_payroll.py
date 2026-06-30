@@ -11,6 +11,7 @@ Handles: current job details, compensation snapshot,
 from google.adk.agents import LlmAgent
 from google.adk.tools import FunctionTool
 from tools import tools_payroll_time as pay
+from tools import tools_compensation as comp
 
 payroll_agent = LlmAgent(
     model="gemini-3.5-flash",
@@ -26,8 +27,8 @@ payroll_agent = LlmAgent(
     ),
     tools=[
         FunctionTool(func=pay.get_my_job),
-        FunctionTool(func=pay.get_my_compensation),
-        FunctionTool(func=pay.get_my_pay_components),
+        FunctionTool(func=comp.get_my_compensation),
+        FunctionTool(func=comp.get_my_pay_components_recurring),
         FunctionTool(func=pay.get_my_beneficiaries),
     ],
 )

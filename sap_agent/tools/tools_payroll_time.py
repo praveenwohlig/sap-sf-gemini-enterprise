@@ -38,28 +38,6 @@ def get_my_job() -> dict:
     return {"job": data}
 
 
-# ── Compensation ──────────────────────────────────────────────────────────────
-
-def get_my_compensation() -> dict:
-    """Return the employee's compensation snapshot (pay grade, bonus target, benefits eligibility)."""
-    data = sf_client.odata_get(
-        entity="EmpCompensation",
-        filter=f"userId eq '{sf_client.USER_ID}'",
-        top=1,
-    )
-    return {"compensation": data}
-
-
-def get_my_pay_components() -> dict:
-    """Return the employee's recurring pay components (base salary, allowances, currency, frequency)."""
-    data = sf_client.odata_get(
-        entity="EmpPayCompRecurring",
-        filter=f"userId eq '{sf_client.USER_ID}'",
-        top=20,
-    )
-    return {"pay_components": data}
-
-
 def get_my_beneficiaries() -> dict:
     """Return the employee's beneficiary records (benefit type, name, relationship, percentage)."""
     data = sf_client.odata_get(
