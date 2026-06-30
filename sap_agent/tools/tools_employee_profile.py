@@ -52,7 +52,8 @@ def get_my_personal_details() -> dict:
     """Return the employee's personal / demographic information."""
     data = sf_client.odata_get(
         entity="PerPersonal",
-        filter=f"personIdExternal eq '{sf_client.USER_ID}' and effectiveLatestChange eq true",
+        filter=f"personIdExternal eq '{sf_client.USER_ID}'",
+        orderby="startDate desc",
         top=1,
     )
     return {"personal_details": data[0] if data else {}}
