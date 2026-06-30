@@ -9,6 +9,7 @@ Routes incoming questions to the correct domain subagent:
   career_agent    — education, work history, skills, awards
   payroll_agent   — job info, compensation, pay components
   time_agent      — timesheets, leave, recordings, allowances
+  compensation_agent  — deductions, compensation info, pay components
 
 The orchestrator never calls SAP APIs directly.
 It analyses the intent and delegates to the right specialist.
@@ -22,6 +23,8 @@ from sub_agents.subagent_identity import identity_agent
 from sub_agents.subagent_career import career_agent
 from sub_agents.subagent_payroll import payroll_agent
 from sub_agents.subagent_time import time_agent
+from sub_agents.subagent_employee_info import employee_info_agent
+from sub_agents.subagent_compensation import compensation_agent
 
 root_agent = LlmAgent(
     model="gemini-2.5-flash",
@@ -60,5 +63,6 @@ root_agent = LlmAgent(
         AgentTool(agent=payroll_agent),
         AgentTool(agent=time_agent),
         AgentTool(agent=employee_info_agent),
+        AgentTool(agent=compensation_agent),
     ],
 )
