@@ -50,10 +50,12 @@ def get_my_profile() -> dict:
 
 def get_my_personal_details() -> dict:
     """Return the employee's personal / demographic information."""
-    data = sf_client.odata_get_single(
-        entity="PerPersonal", entity_id=sf_client.USER_ID,
+    data = sf_client.odata_get(
+        entity="PerPersonal",
+        filter=f"personIdExternal eq '{sf_client.USER_ID}' and effectiveLatestChange eq true",
+        top=1,
     )
-    return {"personal_details": data}
+    return {"personal_details": data[0] if data else {}}
 
 
 def get_my_employment_record() -> dict:
