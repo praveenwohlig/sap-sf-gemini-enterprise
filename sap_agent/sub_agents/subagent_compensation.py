@@ -12,7 +12,7 @@ Handles: deduction screen IDs, one-time deductions,
 
 from google.adk.agents import LlmAgent
 from google.adk.tools import FunctionTool
-from tools import tools_compensation as comp
+from ..tools import tools_compensation as comp
 
 compensation_agent = LlmAgent(
     model="gemini-3.5-flash",

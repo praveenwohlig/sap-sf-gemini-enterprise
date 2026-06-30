@@ -6,7 +6,8 @@ Deploy sap_agent (sandbox mode) to Vertex AI Agent Engine.
 - Subsequent runs: updates the existing Agent Engine in place
 
 Run:
-  python deploy_sandbox.py
+  python deploy_sandbox.py <agent-name>
+  python deploy_sandbox.py sap-sf-sandbox-agent
 
 Output:
   Agent resource path printed to stdout.
@@ -14,6 +15,7 @@ Output:
 """
 
 import os
+import sys
 import subprocess
 from pathlib import Path
 from dotenv import load_dotenv
@@ -24,12 +26,16 @@ import vertexai
 from vertexai import agent_engines
 from sap_agent.agent import root_agent
 
-AGENT_DISPLAY_NAME   = "sap-sf-sandbox-agent"
-RESOURCE_NAME_FILE   = Path(__file__).parent / ".agent_resource"
+if len(sys.argv) < 2:
+    print("Usage: python deploy_sandbox.py <agent-name>")
+    sys.exit(1)
+
+AGENT_DISPLAY_NAME   = sys.argv[1]
+RESOURCE_NAME_FILE   = Path(__file__).parent / f".agent_resource_{AGENT_DISPLAY_NAME}"
 
 REQUIREMENTS = [
     "google-cloud-aiplatform[adk,agent_engines]",
-    "google-adk==1.30.0",
+    "google-adk==2.3.0",
     "requests",
 ]
 EXTRA_PACKAGES = ["./sap_agent"]

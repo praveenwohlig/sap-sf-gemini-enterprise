@@ -18,7 +18,7 @@ Field lists and filter patterns follow the ECCompensation OData spec.
 ══════════════════════════════════════════════════════════════
 """
 
-from sap_sf_config import sf_client
+from ..sap_sf_config import sf_client
 
 
 # ── DeductionScreenId ─────────────────────────────────────────────────────────

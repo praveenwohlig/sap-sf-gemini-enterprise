@@ -15,7 +15,7 @@ Field lists match the ECEmploymentInformation OData spec ($select enums).
 ══════════════════════════════════════════════════════════════
 """
 
-from sap_sf_config import sf_client
+from ..sap_sf_config import sf_client
 
 
 # ── EmpEmploymentTermination ──────────────────────────────────────────────────

@@ -13,7 +13,7 @@ Handles: absence records, leave balances, timesheets,
 
 from google.adk.agents import LlmAgent
 from google.adk.tools import FunctionTool
-from tools import tools_payroll_time as pay
+from ..tools import tools_payroll_time as pay
 
 time_agent = LlmAgent(
     model="gemini-3.5-flash",

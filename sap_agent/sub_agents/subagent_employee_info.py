@@ -11,7 +11,7 @@ Handles: employment termination, pension payout, work permits,
 
 from google.adk.agents import LlmAgent
 from google.adk.tools import FunctionTool
-from tools import tools_employee_info as info
+from ..tools import tools_employee_info as info
 
 employee_info_agent = LlmAgent(
     model="gemini-3.5-flash",

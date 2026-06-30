@@ -33,7 +33,7 @@ Entities sourced from two SAP SuccessFactors API specs:
 ══════════════════════════════════════════════════════════════
 """
 
-from sap_sf_config import sf_client
+from ..sap_sf_config import sf_client
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

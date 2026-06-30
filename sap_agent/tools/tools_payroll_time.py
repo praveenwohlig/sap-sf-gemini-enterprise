@@ -23,7 +23,7 @@ Plus existing EC payroll entities:
 ══════════════════════════════════════════════════════════════
 """
 
-from sap_sf_config import sf_client
+from ..sap_sf_config import sf_client
 
 
 # ── Job Info ──────────────────────────────────────────────────────────────────
