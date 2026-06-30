@@ -59,5 +59,6 @@ root_agent = LlmAgent(
         AgentTool(agent=career_agent),
         AgentTool(agent=payroll_agent),
         AgentTool(agent=time_agent),
+        AgentTool(agent=employee_info_agent),
     ],
 )
