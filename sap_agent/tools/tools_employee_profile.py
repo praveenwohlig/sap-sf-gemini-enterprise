@@ -80,14 +80,16 @@ def get_my_employment_record() -> dict:
     Includes: start date, seniority date, end date,
     contingent worker flag, employment ID, and assignment class.
     """
-    data = sf_client.odata_get_single(
-        entity="EmpEmployment", entity_id=sf_client.USER_ID,
+    data = sf_client.odata_get(
+        entity="EmpEmployment",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "userId,startDate,endDate,seniorityDate,isContingentWorker,"
             "employmentId,assignmentClass,lastModifiedDateTime"
         ),
+        top=1,
     )
-    return {"employment_record": data}
+    return {"employment_record": data[0] if data else {}}
 
 
 def get_my_public_profile() -> dict:
