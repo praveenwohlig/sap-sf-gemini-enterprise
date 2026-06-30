@@ -14,7 +14,7 @@ from google.adk.tools import FunctionTool
 from tools import tools_employee_info as info
 
 employee_info_agent = LlmAgent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     name="employee_info_agent",
     instruction=(
         "You are an HR data specialist for employee information. "

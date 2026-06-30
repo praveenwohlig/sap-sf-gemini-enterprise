@@ -14,7 +14,7 @@ from google.adk.tools import FunctionTool
 from tools import tools_employee_profile as emp
 
 identity_agent = LlmAgent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     name="identity_agent",
     instruction=(
         "You are an HR data specialist for employee identity and organisational information. "
