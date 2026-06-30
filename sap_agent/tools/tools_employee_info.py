@@ -20,7 +20,7 @@ from ..sap_sf_config import sf_client
 
 # ── EmpEmploymentTermination ──────────────────────────────────────────────────
 
-def get_my_employment_termination(user_id: str = None) -> dict:
+def get_my_employment_termination(user_id: str | None = None) -> dict:
     """Return the employee's employment termination details (end date, event reason, rehire eligibility, benefit end dates).
 
     Args:
@@ -37,7 +37,7 @@ def get_my_employment_termination(user_id: str = None) -> dict:
 
 # ── EmpPensionPayout ──────────────────────────────────────────────────────────
 
-def get_my_pension_payout(user_id: str = None) -> dict:
+def get_my_pension_payout(user_id: str | None = None) -> dict:
     """Return the employee's pension payout information (payout schedule, planned end date, payroll end date).
 
     Args:
@@ -54,8 +54,8 @@ def get_my_pension_payout(user_id: str = None) -> dict:
 # ── EmpWorkPermit ─────────────────────────────────────────────────────────────
 
 def get_my_work_permits(
-    user_id: str = None,
-    country: str = None,
+    user_id: str | None = None,
+    country: str | None = None,
 ) -> dict:
     """Return the employee's work permit records (country, document type/number/title, issue/expiration dates, issuing authority).
 
@@ -79,8 +79,8 @@ def get_my_work_permits(
 # ── EmpJobRelationships ───────────────────────────────────────────────────────
 
 def get_my_job_relationships(
-    user_id: str = None,
-    relationship_type: str = None,
+    user_id: str | None = None,
+    relationship_type: str | None = None,
 ) -> dict:
     """Return the employee's job relationship records (relationship type, related user ID, effective dates, operation).
 
@@ -103,7 +103,7 @@ def get_my_job_relationships(
 
 # ── HireDateChange ────────────────────────────────────────────────────────────
 
-def get_my_hire_date_changes(user_id: str = None) -> dict:
+def get_my_hire_date_changes(user_id: str | None = None) -> dict:
     """Return the employee's hire date change records (original hire date, new hire date, processing status, record status).
 
     Args:
@@ -120,7 +120,7 @@ def get_my_hire_date_changes(user_id: str = None) -> dict:
 
 # ── PersonEmpTerminationInfo ──────────────────────────────────────────────────
 
-def get_my_person_emp_termination_info(user_id: str = None) -> dict:
+def get_my_person_emp_termination_info(user_id: str | None = None) -> dict:
     """Return the person-level termination summary (active employment count, latest termination date).
 
     Args:

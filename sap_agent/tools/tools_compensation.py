@@ -34,7 +34,7 @@ def get_deduction_screen_ids() -> dict:
 
 # ── OneTimeDeduction ──────────────────────────────────────────────────────────
 
-def get_my_one_time_deductions(user_id: str = None) -> dict:
+def get_my_one_time_deductions(user_id: str | None = None) -> dict:
     """Return the employee's non-recurring (one-time) deduction records.
 
     Args:
@@ -51,7 +51,7 @@ def get_my_one_time_deductions(user_id: str = None) -> dict:
 
 # ── RecurringDeduction ────────────────────────────────────────────────────────
 
-def get_my_recurring_deductions(user_id: str = None) -> dict:
+def get_my_recurring_deductions(user_id: str | None = None) -> dict:
     """Return the employee's recurring deduction records, including individual deduction items.
 
     Args:
@@ -69,7 +69,7 @@ def get_my_recurring_deductions(user_id: str = None) -> dict:
 
 # ── RecurringDeductionItem ────────────────────────────────────────────────────
 
-def get_my_recurring_deduction_items(user_id: str = None) -> dict:
+def get_my_recurring_deduction_items(user_id: str | None = None) -> dict:
     """Return the employee's individual recurring deduction line items.
 
     Args:
@@ -87,9 +87,9 @@ def get_my_recurring_deduction_items(user_id: str = None) -> dict:
 # ── EmpCompensation ───────────────────────────────────────────────────────────
 
 def get_my_compensation(
-    user_id: str = None,
-    from_date: str = None,
-    to_date: str = None,
+    user_id: str | None = None,
+    from_date: str | None = None,
+    to_date: str | None = None,
 ) -> dict:
     """Return the employee's compensation information (pay grade, bonus target, benefits eligibility).
 
@@ -111,7 +111,7 @@ def get_my_compensation(
 
 # ── EmpCompensationCalculated ─────────────────────────────────────────────────
 
-def get_my_compensation_calculated(user_id: str = None) -> dict:
+def get_my_compensation_calculated(user_id: str | None = None) -> dict:
     """Return the employee's calculated compensation values (Compa-Ratio, Range Penetration).
 
     Args:
@@ -130,8 +130,8 @@ def get_my_compensation_calculated(user_id: str = None) -> dict:
 # ── EmpCompensationGroupSumCalculated ─────────────────────────────────────────
 
 def get_my_compensation_group_sum(
-    user_id: str = None,
-    start_date: str = None,
+    user_id: str | None = None,
+    start_date: str | None = None,
 ) -> dict:
     """Return the employee's calculated pay component group sums from compensation information.
 
@@ -156,8 +156,8 @@ def get_my_compensation_group_sum(
 # ── EmpPayCompNonRecurring ────────────────────────────────────────────────────
 
 def get_my_pay_components_non_recurring(
-    user_id: str = None,
-    pay_component_code: str = None,
+    user_id: str | None = None,
+    pay_component_code: str | None = None,
 ) -> dict:
     """Return the employee's non-recurring (one-time) pay component records (bonuses, spot awards).
 
@@ -181,10 +181,10 @@ def get_my_pay_components_non_recurring(
 # ── EmpPayCompRecurring ───────────────────────────────────────────────────────
 
 def get_my_pay_components_recurring(
-    user_id: str = None,
-    from_date: str = None,
-    to_date: str = None,
-    pay_component: str = None,
+    user_id: str | None = None,
+    from_date: str | None = None,
+    to_date: str | None = None,
+    pay_component: str | None = None,
 ) -> dict:
     """Return the employee's recurring pay component records (base salary, allowances).
 
