@@ -20,7 +20,6 @@ from typing import Optional
 import os, functools, requests
 from google.adk.tools import ToolContext
 from google.cloud import secretmanager
-import sf_auth, sf_client
 
 HOST    = os.environ["SF_SANDBOX_HOST"]
 API_KEY = os.environ["SF_SANDBOX_API_KEY"]
@@ -28,38 +27,38 @@ USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
 
 
 # PROD
-HOST = os.environ["SF_HOST"]
-COMPANY_ID = os.environ["SF_COMPANY_ID"]
-CLIENT_ID = os.environ["SF_CLIENT_ID"]
-ISSUER = os.environ["SF_SAML_ISSUER"]
-KEY_SECRET = os.environ["SF_PRIVATE_KEY_SECRET"]
-AUTH_ID = os.environ["SF_AUTH_ID"]  # must match the authorization id set in Step 8
-USERINFO = "https://openidconnect.googleapis.com/v1/userinfo"
+# HOST = os.environ["SF_HOST"]
+# COMPANY_ID = os.environ["SF_COMPANY_ID"]
+# CLIENT_ID = os.environ["SF_CLIENT_ID"]
+# ISSUER = os.environ["SF_SAML_ISSUER"]
+# KEY_SECRET = os.environ["SF_PRIVATE_KEY_SECRET"]
+# AUTH_ID = os.environ["SF_AUTH_ID"]  # must match the authorization id set in Step 8
+# USERINFO = "https://openidconnect.googleapis.com/v1/userinfo"
 
-def _private_key():
-    client = secretmanager.SecretManagerServiceClient()
-    return client.access_secret_version(name=KEY_SECRET).payload.data.decode()
+# def _private_key():
+#     client = secretmanager.SecretManagerServiceClient()
+#     return client.access_secret_version(name=KEY_SECRET).payload.data.decode()
 
-def _caller_email(tool_context: ToolContext) -> str:
-    # Gemini Enterprise forwards the consented user OAuth token when the agent is
-    # registered with an authorization. It is keyed by the authorization id.
-    token = tool_context.state.get(f"temp:{AUTH_ID}")
-    if not token:
-        raise PermissionError("No user authorization present in the session.")
-    r = requests.get(USERINFO, headers={"Authorization": f"Bearer {token}"}, timeout=10)
-    r.raise_for_status()
-    return r.json()["email"]
+# def _caller_email(tool_context: ToolContext) -> str:
+#     # Gemini Enterprise forwards the consented user OAuth token when the agent is
+#     # registered with an authorization. It is keyed by the authorization id.
+#     token = tool_context.state.get(f"temp:{AUTH_ID}")
+#     if not token:
+#         raise PermissionError("No user authorization present in the session.")
+#     r = requests.get(USERINFO, headers={"Authorization": f"Bearer {token}"}, timeout=10)
+#     r.raise_for_status()
+#     return r.json()["email"]
 
-def _sf_user_id(email: str) -> str:
-    # Map the corporate email to the SuccessFactors user id. Replace with your
-    # directory lookup or a one time admin query on the User entity by email.
-    return email.split("@")[0]
+# def _sf_user_id(email: str) -> str:
+#     # Map the corporate email to the SuccessFactors user id. Replace with your
+#     # directory lookup or a one time admin query on the User entity by email.
+#     return email.split("@")[0]
 
-def _token_for(tool_context: ToolContext) -> tuple:
-    sf_user = _sf_user_id(_caller_email(tool_context))
-    token = sf_auth.get_user_token(sf_user, HOST, COMPANY_ID, CLIENT_ID,
-                                   _private_key(), ISSUER)
-    return sf_user, token
+# def _token_for(tool_context: ToolContext) -> tuple:
+#     sf_user = _sf_user_id(_caller_email(tool_context))
+#     token = sf_auth.get_user_token(sf_user, HOST, COMPANY_ID, CLIENT_ID,
+#                                    _private_key(), ISSUER)
+#     return sf_user, token
 
 
 def _auth_headers() -> dict:
