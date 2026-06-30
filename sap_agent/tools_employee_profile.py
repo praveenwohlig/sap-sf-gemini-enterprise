@@ -14,7 +14,7 @@ from . import sf_client
 
 HOST    = os.environ["SF_SANDBOX_HOST"]
 API_KEY = os.environ["SF_SANDBOX_API_KEY"]
-USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
+USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "10000")
 
 
 # ── Profile & Identity ────────────────────────────────────────────────────────
