@@ -16,7 +16,7 @@ from google.adk.tools import FunctionTool
 from ..tools import tools_payroll_time as pay
 
 time_agent = LlmAgent(
-    model="gemini-3.5-flash",
+    model="gemini-2.5-pro",
     name="time_agent",
     instruction=(
         "You are an HR data specialist for employee time management and leave. "

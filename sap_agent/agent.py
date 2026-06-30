@@ -27,7 +27,7 @@ from .sub_agents.subagent_employee_info import employee_info_agent
 from .sub_agents.subagent_compensation import compensation_agent
 
 root_agent = LlmAgent(
-    model="gemini-3.5-flash",
+    model="gemini-2.5-pro",
     name="sap_sf_hr_orchestrator",
     instruction=(
         "You are the SAP SuccessFactors HR Assistant. "

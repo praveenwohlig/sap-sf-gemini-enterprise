@@ -14,7 +14,7 @@ from ..tools import tools_payroll_time as pay
 from ..tools import tools_compensation as comp
 
 payroll_agent = LlmAgent(
-    model="gemini-3.5-flash",
+    model="gemini-2.5-pro",
     name="payroll_agent",
     instruction=(
         "You are an HR data specialist for employee payroll and compensation. "
