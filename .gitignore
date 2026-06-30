@@ -1,0 +1,30 @@
+# Environment & secrets
+.env
+.env.*
+*.env
+store_secret.sh
+
+# Agent Engine resource name (contains project numbers)
+.agent_resource
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# ADK local session state
+.adk/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# macOS
+.DS_Store
