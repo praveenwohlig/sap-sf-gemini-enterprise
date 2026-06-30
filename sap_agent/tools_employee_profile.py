@@ -6,89 +6,137 @@ ADK Tools — Employee Profile domain
 Covers: User, PerPersonal, EmpEmployment, PerEmail, PerPhone,
         PerAddressDEFLT, PerEmergencyContacts, PerNationalId,
         EmpGlobalAssignment, manager lookup, direct reports.
-
-Field lists and entity names live in entity_config.py.
-No hardcoded strings here.
 ══════════════════════════════════════════════════════════════
 """
 
 import os
 from . import sf_client
-from .entity_config import ENTITY_BY_TOOL
 
 HOST    = os.environ["SF_SANDBOX_HOST"]
 API_KEY = os.environ["SF_SANDBOX_API_KEY"]
 USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
 
 
-def _fetch(tool_name: str) -> dict:
-    cfg    = ENTITY_BY_TOOL[tool_name]
-    select = ",".join(cfg["select"])
-    key    = cfg["result_key"]
-
-    if cfg["filter_by"] is None:
-        data = sf_client.odata_get_single(
-            host=HOST, entity=cfg["name"], entity_id=USER_ID,
-            api_key=API_KEY, select=select,
-        )
-    else:
-        data = sf_client.odata_get(
-            host=HOST, entity=cfg["name"], api_key=API_KEY,
-            filter=f"{cfg['filter_by']} eq '{USER_ID}'",
-            select=select, top=cfg["top"],
-        )
-    return {key: data}
-
-
 # ── Profile & Identity ────────────────────────────────────────────────────────
 
 def get_my_profile() -> dict:
     """Return the employee's SAP SuccessFactors profile (name, email, title, status)."""
-    return _fetch("get_my_profile")
+    data = sf_client.odata_get_single(
+        host=HOST, entity="User", entity_id=USER_ID, api_key=API_KEY,
+        select=(
+            "userId,username,firstName,lastName,email,title,department,"
+            "location,gender,timeZone,defaultLocale,hireDate,status,"
+            "displayName,defaultFullName,lastModifiedDateTime"
+        ),
+    )
+    return {"profile": data}
 
 
 def get_my_personal() -> dict:
     """Return the employee's personal info (name, gender, nationality, DOB, marital status)."""
-    return _fetch("get_my_personal")
+    data = sf_client.odata_get_single(
+        host=HOST, entity="PerPersonal", entity_id=USER_ID, api_key=API_KEY,
+        select=(
+            "personIdExternal,firstName,lastName,middleName,gender,"
+            "nationality,dateOfBirth,maritalStatus,nativePreferredLang,"
+            "salutation,lastModifiedDateTime"
+        ),
+    )
+    return {"personal": data}
 
 
 def get_my_employment() -> dict:
     """Return the employee's employment record (start date, seniority, contingent worker flag)."""
-    return _fetch("get_my_employment")
+    data = sf_client.odata_get_single(
+        host=HOST, entity="EmpEmployment", entity_id=USER_ID, api_key=API_KEY,
+        select=(
+            "userId,startDate,endDate,seniorityDate,isContingentWorker,"
+            "employmentId,assignmentClass,lastModifiedDateTime"
+        ),
+    )
+    return {"employment": data}
 
 
 # ── Contact Details ───────────────────────────────────────────────────────────
 
 def get_my_email() -> dict:
     """Return the employee's email address records (email type, address, primary flag)."""
-    return _fetch("get_my_email")
+    data = sf_client.odata_get(
+        host=HOST, entity="PerEmail", api_key=API_KEY,
+        filter=f"personIdExternal eq '{USER_ID}'",
+        select="personIdExternal,emailType,emailAddress,isPrimary,lastModifiedDateTime",
+        top=10,
+    )
+    return {"emails": data}
 
 
 def get_my_phone() -> dict:
     """Return the employee's phone number records (phone type, number, primary flag)."""
-    return _fetch("get_my_phone")
+    data = sf_client.odata_get(
+        host=HOST, entity="PerPhone", api_key=API_KEY,
+        filter=f"personIdExternal eq '{USER_ID}'",
+        select="personIdExternal,phoneType,phoneNumber,isPrimary,lastModifiedDateTime",
+        top=10,
+    )
+    return {"phones": data}
 
 
 def get_my_address() -> dict:
     """Return the employee's home address (street, city, state, zip, country)."""
-    return _fetch("get_my_address")
+    data = sf_client.odata_get(
+        host=HOST, entity="PerAddressDEFLT", api_key=API_KEY,
+        filter=f"personIdExternal eq '{USER_ID}'",
+        select=(
+            "personIdExternal,addressType,address1,address2,address3,"
+            "city,state,zipCode,county,country,lastModifiedDateTime"
+        ),
+        top=10,
+    )
+    return {"addresses": data}
 
 
 def get_my_emergency_contacts() -> dict:
     """Return the employee's emergency contacts (name, relationship, phone)."""
-    return _fetch("get_my_emergency_contacts")
+    data = sf_client.odata_get(
+        host=HOST, entity="PerEmergencyContacts", api_key=API_KEY,
+        filter=f"personIdExternal eq '{USER_ID}'",
+        select=(
+            "personIdExternal,firstName,lastName,relationship,"
+            "phone,isPrimary,lastModifiedDateTime"
+        ),
+        top=10,
+    )
+    return {"emergency_contacts": data}
 
 
 # ── IDs & Assignments ─────────────────────────────────────────────────────────
 
 def get_my_national_id() -> dict:
     """Return the employee's national / government ID records (country, ID number, card type)."""
-    return _fetch("get_my_national_id")
+    data = sf_client.odata_get(
+        host=HOST, entity="PerNationalId", api_key=API_KEY,
+        filter=f"personIdExternal eq '{USER_ID}'",
+        select=(
+            "personIdExternal,country,nationalId,cardType,"
+            "isPrimary,lastModifiedDateTime"
+        ),
+        top=10,
+    )
+    return {"national_ids": data}
 
 
 def get_my_global_assignment() -> dict:
     """Return the employee's global assignment records (host company, start/end dates)."""
-    return _fetch("get_my_global_assignment")
+    data = sf_client.odata_get(
+        host=HOST, entity="EmpGlobalAssignment", api_key=API_KEY,
+        filter=f"userId eq '{USER_ID}'",
+        select=(
+            "userId,startDate,endDate,assignmentClass,hostCompany,"
+            "hostBusinessUnit,hostDivision,hostDepartment,lastModifiedDateTime"
+        ),
+        top=10,
+    )
+    return {"global_assignments": data}
 
 
 # ── Org Chart ─────────────────────────────────────────────────────────────────
@@ -104,20 +152,22 @@ def get_my_manager() -> dict:
     manager_id = job[0].get("managerId")
     if not manager_id:
         return {"manager": None}
-    profile_cfg = ENTITY_BY_TOOL["get_my_profile"]
     manager = sf_client.odata_get_single(
-        host=HOST, entity="User", entity_id=manager_id,
-        api_key=API_KEY, select=",".join(profile_cfg["select"]),
+        host=HOST, entity="User", entity_id=manager_id, api_key=API_KEY,
+        select=(
+            "userId,username,firstName,lastName,email,title,"
+            "department,location,displayName,lastModifiedDateTime"
+        ),
     )
     return {"manager": manager}
 
 
 def list_direct_reports() -> dict:
     """Return the employees who report directly to this employee (org chart)."""
-    reports = sf_client.odata_get(
+    data = sf_client.odata_get(
         host=HOST, entity="EmpJob", api_key=API_KEY,
         filter=f"managerId eq '{USER_ID}'",
         select="userId,jobTitle,department,location,emplStatus",
         top=50,
     )
-    return {"direct_reports": reports}
+    return {"direct_reports": data}

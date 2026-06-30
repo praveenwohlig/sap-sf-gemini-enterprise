@@ -5,71 +5,105 @@ ADK Tools — Payroll & Time domain
 
 Covers: EmpJob, EmpCompensation, EmpPayCompRecurring,
         EmployeeTime, TimeAccount, EmpBeneficiary.
-
-Field lists and entity names live in entity_config.py.
-No hardcoded strings here.
 ══════════════════════════════════════════════════════════════
 """
 
 import os
 from . import sf_client
-from .entity_config import ENTITY_BY_TOOL
 
 HOST    = os.environ["SF_SANDBOX_HOST"]
 API_KEY = os.environ["SF_SANDBOX_API_KEY"]
 USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
 
 
-def _fetch(tool_name: str) -> dict:
-    cfg    = ENTITY_BY_TOOL[tool_name]
-    select = ",".join(cfg["select"])
-    key    = cfg["result_key"]
-
-    if cfg["filter_by"] is None:
-        data = sf_client.odata_get_single(
-            host=HOST, entity=cfg["name"], entity_id=USER_ID,
-            api_key=API_KEY, select=select,
-        )
-    else:
-        data = sf_client.odata_get(
-            host=HOST, entity=cfg["name"], api_key=API_KEY,
-            filter=f"{cfg['filter_by']} eq '{USER_ID}'",
-            select=select, top=cfg["top"],
-        )
-    return {key: data}
-
-
 # ── Job Info ──────────────────────────────────────────────────────────────────
 
 def get_my_job() -> dict:
     """Return the employee's current job info (title, department, pay grade, manager)."""
-    return _fetch("get_my_job")
+    data = sf_client.odata_get(
+        host=HOST, entity="EmpJob", api_key=API_KEY,
+        filter=f"userId eq '{USER_ID}'",
+        select=(
+            "userId,jobTitle,department,location,startDate,emplStatus,"
+            "position,jobCode,payGrade,payGroup,managerId,companyId,"
+            "businessUnit,division,costCenter,fullPartTime,regularTemp"
+        ),
+        top=1,
+    )
+    return {"job": data}
 
 
 # ── Compensation ──────────────────────────────────────────────────────────────
 
 def get_my_compensation() -> dict:
     """Return the employee's compensation info (pay grade, bonus target, benefits eligibility)."""
-    return _fetch("get_my_compensation")
+    data = sf_client.odata_get(
+        host=HOST, entity="EmpCompensation", api_key=API_KEY,
+        filter=f"userId eq '{USER_ID}'",
+        select=(
+            "userId,startDate,endDate,seqNumber,payType,payGrade,payGroup,"
+            "bonusTarget,benefitsRate,isEligibleForBenefits,isEligibleForCar,"
+            "isHighlyCompensatedEmployee,event,eventReason,lastModifiedDateTime"
+        ),
+        top=1,
+    )
+    return {"compensation": data}
 
 
 def get_my_pay_components() -> dict:
     """Return the employee's recurring pay components (base salary, allowances, currency)."""
-    return _fetch("get_my_pay_components")
+    data = sf_client.odata_get(
+        host=HOST, entity="EmpPayCompRecurring", api_key=API_KEY,
+        filter=f"userId eq '{USER_ID}'",
+        select=(
+            "userId,startDate,endDate,payComponent,payComponentValue,"
+            "currency,frequencyCode,seqNumber,lastModifiedDateTime"
+        ),
+        top=20,
+    )
+    return {"pay_components": data}
 
 
 def get_my_beneficiaries() -> dict:
     """Return the employee's beneficiary records (benefit type, name, relationship, percentage)."""
-    return _fetch("get_my_beneficiaries")
+    data = sf_client.odata_get(
+        host=HOST, entity="EmpBeneficiary", api_key=API_KEY,
+        filter=f"userId eq '{USER_ID}'",
+        select=(
+            "userId,startDate,endDate,benefitType,firstName,lastName,"
+            "relationship,percentage,lastModifiedDateTime"
+        ),
+        top=20,
+    )
+    return {"beneficiaries": data}
 
 
 # ── Time Off & Leave ──────────────────────────────────────────────────────────
 
 def get_my_time_off() -> dict:
     """Return the employee's time-off / absence records (vacation, sick leave, approval status)."""
-    return _fetch("get_my_time_off")
+    data = sf_client.odata_get(
+        host=HOST, entity="EmployeeTime", api_key=API_KEY,
+        filter=f"userId eq '{USER_ID}'",
+        select=(
+            "userId,startDate,endDate,timeType,quantityInDays,"
+            "quantityInHours,approvalStatus,deductionQuantity,"
+            "comment,lastModifiedDateTime"
+        ),
+        top=10,
+    )
+    return {"time_off": data}
 
 
 def get_my_leave_balance() -> dict:
     """Return the employee's leave account balances (vacation balance, sick leave balance)."""
-    return _fetch("get_my_leave_balance")
+    data = sf_client.odata_get(
+        host=HOST, entity="TimeAccount", api_key=API_KEY,
+        filter=f"userId eq '{USER_ID}'",
+        select=(
+            "userId,timeAccountType,balance,bookingEndDate,"
+            "accountClosed,lastModifiedDateTime"
+        ),
+        top=20,
+    )
+    return {"leave_balances": data}

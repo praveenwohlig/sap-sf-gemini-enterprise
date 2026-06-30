@@ -7,29 +7,24 @@ Uses SAP API Hub APIKey — no SAML, no GCP credentials needed.
 Tool sources:
   tools_employee_profile.py  — profile, contact, IDs, org chart
   tools_payroll_time.py      — job, compensation, time off, leave
-
-Entity fields and domains configured in entity_config.py.
 ══════════════════════════════════════════════════════════════
 """
 
 from google.adk.agents import LlmAgent
 from google.adk.tools import FunctionTool
-from .entity_config import DOMAINS
 from . import tools_employee_profile as emp
 from . import tools_payroll_time as pay
-
-# Build instruction from domain config — no hardcoded text
-_domain_text = ", ".join(DOMAINS.values())
 
 root_agent = LlmAgent(
     model="gemini-2.5-flash",
     name="sap_sf_hr_agent_sandbox",
     instruction=(
-        f"You are an HR assistant connected to SAP SuccessFactors sandbox. "
-        f"Use the available tools to answer questions about the employee's "
-        f"{_domain_text}. "
-        f"This is a sandbox environment with sample data. "
-        f"Always call the relevant tool before answering — never guess field values."
+        "You are an HR assistant connected to SAP SuccessFactors sandbox. "
+        "Use the available tools to answer questions about the employee's "
+        "profile, personal info, contact details, national IDs, global assignments, "
+        "org chart, job details, compensation, pay components, time off, and leave balances. "
+        "This is a sandbox environment with sample data. "
+        "Always call the relevant tool before answering — never guess field values."
     ),
     tools=[
         # ── Employee Profile ──────────────────────────────────────────────
