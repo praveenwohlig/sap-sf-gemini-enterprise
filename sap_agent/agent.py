@@ -1,51 +1,63 @@
 """
 agent.py
 ══════════════════════════════════════════════════════════════
-ADK Agent — SAP SuccessFactors HR Assistant (Sandbox Mode)
-Uses SAP API Hub APIKey — no SAML, no GCP credentials needed.
+Root Orchestrator — SAP SuccessFactors HR Assistant
 
-Tool sources:
-  tools_employee_profile.py  — profile, contact, IDs, org chart
-  tools_payroll_time.py      — job, compensation, time off, leave
+Routes incoming questions to the correct domain subagent:
+
+  identity_agent  — profile, contact, IDs, org chart
+  career_agent    — education, work history, skills, awards
+  payroll_agent   — job info, compensation, pay components
+  time_agent      — timesheets, leave, recordings, allowances
+
+The orchestrator never calls SAP APIs directly.
+It analyses the intent and delegates to the right specialist.
 ══════════════════════════════════════════════════════════════
 """
 
 from google.adk.agents import LlmAgent
-from google.adk.tools import FunctionTool
-from . import tools_employee_profile as emp
-from . import tools_payroll_time as pay
+from google.adk.tools.agent_tool import AgentTool
+
+from .subagent_identity import identity_agent
+from .subagent_career import career_agent
+from .subagent_payroll import payroll_agent
+from .subagent_time import time_agent
 
 root_agent = LlmAgent(
     model="gemini-2.5-flash",
-    name="sap_sf_hr_agent_sandbox",
+    name="sap_sf_hr_orchestrator",
     instruction=(
-        "You are an HR assistant connected to SAP SuccessFactors sandbox. "
-        "Use the available tools to answer questions about the employee's "
-        "profile, personal info, contact details, national IDs, global assignments, "
-        "org chart, job details, compensation, pay components, time off, and leave balances. "
-        "This is a sandbox environment with sample data. "
-        "Always call the relevant tool before answering — never guess field values."
+        "You are the SAP SuccessFactors HR Assistant. "
+        "Your role is to understand the employee's question and delegate it "
+        "to the correct specialist subagent. Never answer from memory — "
+        "always route to a subagent and return its response.\n\n"
+
+        "Routing rules:\n"
+        "• identity_agent  → name, profile, personal details, employment record, "
+        "contact details (email/phone/address), emergency contacts, national IDs, "
+        "global assignments, public bio, who is my manager, direct reports, org chart\n"
+
+        "• career_agent    → education, university, degree, certifications, licences, "
+        "languages, previous employers, work history, internal job history, "
+        "special projects, training courses, skills, expertise, leadership, "
+        "awards, badges, recognition, memberships, community\n"
+
+        "• payroll_agent   → salary, pay grade, compensation, pay components, "
+        "bonus, benefits eligibility, job title, department, pay group, beneficiaries\n"
+
+        "• time_agent      → leave balance, vacation, sick leave, time off, "
+        "timesheet, clock-in, clock-out, recorded hours, planned hours, "
+        "overtime, flexi-time, time collector, allowance, external time data\n\n"
+
+        "If a question spans multiple domains (e.g. 'give me my full profile'), "
+        "call the relevant subagents sequentially and combine the results into "
+        "a single, well-structured response. "
+        "Be concise, factual, and always label the data clearly."
     ),
     tools=[
-        # ── Employee Profile ──────────────────────────────────────────────
-        FunctionTool(func=emp.get_my_profile),
-        FunctionTool(func=emp.get_my_personal),
-        FunctionTool(func=emp.get_my_employment),
-        FunctionTool(func=emp.get_my_email),
-        FunctionTool(func=emp.get_my_phone),
-        FunctionTool(func=emp.get_my_address),
-        FunctionTool(func=emp.get_my_emergency_contacts),
-        FunctionTool(func=emp.get_my_national_id),
-        FunctionTool(func=emp.get_my_global_assignment),
-        FunctionTool(func=emp.get_my_manager),
-        FunctionTool(func=emp.list_direct_reports),
-
-        # ── Payroll & Time ────────────────────────────────────────────────
-        FunctionTool(func=pay.get_my_job),
-        FunctionTool(func=pay.get_my_compensation),
-        FunctionTool(func=pay.get_my_pay_components),
-        FunctionTool(func=pay.get_my_beneficiaries),
-        FunctionTool(func=pay.get_my_time_off),
-        FunctionTool(func=pay.get_my_leave_balance),
+        AgentTool(agent=identity_agent),
+        AgentTool(agent=career_agent),
+        AgentTool(agent=payroll_agent),
+        AgentTool(agent=time_agent),
     ],
 )
