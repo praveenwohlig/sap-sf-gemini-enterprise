@@ -51,14 +51,13 @@ def get_my_pension_payout(user_id: str = None) -> dict:
         user_id: Employee user ID to look up. Defaults to the logged-in user.
     """
     uid = user_id or sf_client.USER_ID
-    data = sf_client.odata_get(
+    data = sf_client.odata_get_single(
         entity="EmpPensionPayout",
-        filter=f"userId eq '{uid}'",
+        entity_id=uid,
         select=(
             "personIdExternal,userId,startDate,endDate,"
             "plannedEndDate,payrollEndDate,lastModifiedDateTime"
         ),
-        top=10,
     )
     return {"pension_payout": data}
 
