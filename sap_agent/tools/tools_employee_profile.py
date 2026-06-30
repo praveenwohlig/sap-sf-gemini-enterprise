@@ -33,12 +33,7 @@ Entities sourced from two SAP SuccessFactors API specs:
 ══════════════════════════════════════════════════════════════
 """
 
-import os
-from . import sf_client
-
-HOST    = os.environ["SF_SANDBOX_HOST"]
-API_KEY = os.environ["SF_SANDBOX_API_KEY"]
-USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
+from sap_sf_config import sf_client
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -52,7 +47,7 @@ def get_my_profile() -> dict:
     hire date, employment status, time zone, and locale.
     """
     data = sf_client.odata_get_single(
-        host=HOST, entity="User", entity_id=USER_ID, api_key=API_KEY,
+        entity="User", entity_id=sf_client.USER_ID,
         select=(
             "userId,username,firstName,lastName,email,title,department,"
             "location,gender,timeZone,defaultLocale,hireDate,status,"
@@ -69,7 +64,7 @@ def get_my_personal_details() -> dict:
     marital status, preferred language, and salutation.
     """
     data = sf_client.odata_get_single(
-        host=HOST, entity="PerPersonal", entity_id=USER_ID, api_key=API_KEY,
+        entity="PerPersonal", entity_id=sf_client.USER_ID,
         select=(
             "personIdExternal,firstName,lastName,middleName,gender,"
             "nationality,dateOfBirth,maritalStatus,nativePreferredLang,"
@@ -86,7 +81,7 @@ def get_my_employment_record() -> dict:
     contingent worker flag, employment ID, and assignment class.
     """
     data = sf_client.odata_get_single(
-        host=HOST, entity="EmpEmployment", entity_id=USER_ID, api_key=API_KEY,
+        entity="EmpEmployment", entity_id=sf_client.USER_ID,
         select=(
             "userId,startDate,endDate,seniorityDate,isContingentWorker,"
             "employmentId,assignmentClass,lastModifiedDateTime"
@@ -102,8 +97,8 @@ def get_my_public_profile() -> dict:
     expressive mode, and profile photo permissions.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="EPPublicProfile", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="EPPublicProfile",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "userId,introduction,hasIntroduction,hasMyName,hasAboutMeVideo,"
             "isBadgesSectionEnabled,isAddBadgeAllowed,isExpressiveMode,"
@@ -124,8 +119,8 @@ def get_my_email_addresses() -> dict:
     Includes: email type (work/personal), address, and primary flag.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="PerEmail", api_key=API_KEY,
-        filter=f"personIdExternal eq '{USER_ID}'",
+        entity="PerEmail",
+        filter=f"personIdExternal eq '{sf_client.USER_ID}'",
         select="personIdExternal,emailType,emailAddress,isPrimary,lastModifiedDateTime",
         top=10,
     )
@@ -138,8 +133,8 @@ def get_my_phone_numbers() -> dict:
     Includes: phone type (mobile/work/home), number, and primary flag.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="PerPhone", api_key=API_KEY,
-        filter=f"personIdExternal eq '{USER_ID}'",
+        entity="PerPhone",
+        filter=f"personIdExternal eq '{sf_client.USER_ID}'",
         select="personIdExternal,phoneType,phoneNumber,isPrimary,lastModifiedDateTime",
         top=10,
     )
@@ -152,8 +147,8 @@ def get_my_home_address() -> dict:
     Includes: street lines, city, state, zip code, county, and country.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="PerAddressDEFLT", api_key=API_KEY,
-        filter=f"personIdExternal eq '{USER_ID}'",
+        entity="PerAddressDEFLT",
+        filter=f"personIdExternal eq '{sf_client.USER_ID}'",
         select=(
             "personIdExternal,addressType,address1,address2,address3,"
             "city,state,zipCode,county,country,lastModifiedDateTime"
@@ -169,8 +164,8 @@ def get_my_emergency_contacts() -> dict:
     Includes: name, relationship, phone number, and primary flag.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="PerEmergencyContacts", api_key=API_KEY,
-        filter=f"personIdExternal eq '{USER_ID}'",
+        entity="PerEmergencyContacts",
+        filter=f"personIdExternal eq '{sf_client.USER_ID}'",
         select=(
             "personIdExternal,firstName,lastName,relationship,"
             "phone,isPrimary,lastModifiedDateTime"
@@ -190,8 +185,8 @@ def get_my_national_ids() -> dict:
     Includes: country, ID number, card type, and primary flag.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="PerNationalId", api_key=API_KEY,
-        filter=f"personIdExternal eq '{USER_ID}'",
+        entity="PerNationalId",
+        filter=f"personIdExternal eq '{sf_client.USER_ID}'",
         select=(
             "personIdExternal,country,nationalId,cardType,"
             "isPrimary,lastModifiedDateTime"
@@ -208,8 +203,8 @@ def get_my_global_assignments() -> dict:
     start and end dates, and assignment class.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="EmpGlobalAssignment", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="EmpGlobalAssignment",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "userId,startDate,endDate,assignmentClass,hostCompany,"
             "hostBusinessUnit,hostDivision,hostDepartment,lastModifiedDateTime"
@@ -230,8 +225,8 @@ def get_my_manager() -> dict:
     manager's profile (name, title, department, email).
     """
     job = sf_client.odata_get(
-        host=HOST, entity="EmpJob", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'", select="userId,managerId", top=1,
+        entity="EmpJob",
+        filter=f"userId eq '{sf_client.USER_ID}'", select="userId,managerId", top=1,
     )
     if not job:
         return {"manager": None}
@@ -239,7 +234,7 @@ def get_my_manager() -> dict:
     if not manager_id:
         return {"manager": None}
     manager = sf_client.odata_get_single(
-        host=HOST, entity="User", entity_id=manager_id, api_key=API_KEY,
+        entity="User", entity_id=manager_id,
         select=(
             "userId,username,firstName,lastName,email,title,"
             "department,location,displayName,lastModifiedDateTime"
@@ -254,8 +249,8 @@ def get_my_direct_reports() -> dict:
     Includes: userId, job title, department, location, and employment status.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="EmpJob", api_key=API_KEY,
-        filter=f"managerId eq '{USER_ID}'",
+        entity="EmpJob",
+        filter=f"managerId eq '{sf_client.USER_ID}'",
         select="userId,jobTitle,department,location,emplStatus",
         top=50,
     )
@@ -273,8 +268,8 @@ def get_my_education() -> dict:
     degree date, school city, state, and country.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="Background_Education", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="Background_Education",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "backgroundElementId,userId,school,degree,major,"
             "startDate,endDate,degreeDate,schoolType,"
@@ -292,8 +287,8 @@ def get_my_certifications() -> dict:
     licence country/state, validity start/end dates, and description.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="Background_Certificates", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="Background_Certificates",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "backgroundElementId,userId,name,institution,description,"
             "startDate,endDate,licenseName,licenseNumber,"
@@ -311,8 +306,8 @@ def get_my_languages() -> dict:
     writing proficiency, and language variant.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="Background_Languages", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="Background_Languages",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "backgroundElementId,userId,language,variant,"
             "readingProf,speakingProf,writingProf,lastModifiedDate"
@@ -333,8 +328,8 @@ def get_my_previous_employers() -> dict:
     employer city, country, and contact information.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="Background_OutsideWorkExperience", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="Background_OutsideWorkExperience",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "backgroundElementId,userId,employer,startTitle,"
             "startDate,endDate,presentEmployer,"
@@ -352,8 +347,8 @@ def get_my_internal_job_history() -> dict:
     Includes: previous job title, department, start date, and end date.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="Background_InsideWorkExperience", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="Background_InsideWorkExperience",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "backgroundElementId,userId,title,department,"
             "startDate,endDate,lastModifiedDate"
@@ -369,8 +364,8 @@ def get_my_special_projects() -> dict:
     Includes: project name, description, start and end dates.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="Background_SpecialAssign", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="Background_SpecialAssign",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "backgroundElementId,userId,project,description,"
             "startDate,endDate,lastModifiedDate"
@@ -387,8 +382,8 @@ def get_my_training_courses() -> dict:
     course length, and end date.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="Background_Courses", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="Background_Courses",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "backgroundElementId,userId,course,institution,"
             "instructionType,length,endDate,lastModifiedDate"
@@ -408,8 +403,8 @@ def get_my_functional_expertise() -> dict:
     Includes: experience area, years of experience, and comments.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="Background_FuncExperience", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="Background_FuncExperience",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "backgroundElementId,userId,experience,years,"
             "comments,lastModifiedDate"
@@ -426,8 +421,8 @@ def get_my_leadership_experience() -> dict:
     managed, budget managed (dollars), and comments.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="Background_LeadExperience", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="Background_LeadExperience",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "backgroundElementId,userId,experience,years,"
             "people,dollars,comments,lastModifiedDate"
@@ -447,8 +442,8 @@ def get_my_awards() -> dict:
     Includes: award name, issuing institution, issue date, and description.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="Background_Awards", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="Background_Awards",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "backgroundElementId,userId,name,institution,"
             "issueDate,description,lastModifiedDate"
@@ -464,8 +459,8 @@ def get_my_badges() -> dict:
     Includes: badge title, giver name, comment, and badge ID.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="UserBadges", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="UserBadges",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "badgeInstanceId,userId,badgeId,badgeTitle,"
             "badgeCreatorName,creatorUserID,comment,lastModified"
@@ -481,8 +476,8 @@ def get_my_professional_memberships() -> dict:
     Includes: organization name, role, start date, and end date.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="Background_Memberships", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="Background_Memberships",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "backgroundElementId,userId,organization,role,"
             "startDate,endDate,lastModifiedDate"
@@ -498,8 +493,8 @@ def get_my_community_involvement() -> dict:
     Includes: community name, role, start date, and end date.
     """
     data = sf_client.odata_get(
-        host=HOST, entity="Background_Community", api_key=API_KEY,
-        filter=f"userId eq '{USER_ID}'",
+        entity="Background_Community",
+        filter=f"userId eq '{sf_client.USER_ID}'",
         select=(
             "backgroundElementId,userId,name,role,"
             "startDate,endDate,lastModifiedDate"

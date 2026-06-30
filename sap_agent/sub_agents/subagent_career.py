@@ -12,7 +12,7 @@ Handles: education, certifications, languages, previous employers,
 
 from google.adk.agents import LlmAgent
 from google.adk.tools import FunctionTool
-from . import tools_employee_profile as emp
+from tools import tools_employee_profile as emp
 
 career_agent = LlmAgent(
     model="gemini-2.5-flash",
