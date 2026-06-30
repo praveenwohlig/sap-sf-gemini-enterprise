@@ -22,6 +22,7 @@ from .subagent_identity import identity_agent
 from .subagent_career import career_agent
 from .subagent_payroll import payroll_agent
 from .subagent_time import time_agent
+from tools import tools_employee_profile as emp
 
 root_agent = LlmAgent(
     model="gemini-2.5-flash",
@@ -59,5 +60,6 @@ root_agent = LlmAgent(
         AgentTool(agent=career_agent),
         AgentTool(agent=payroll_agent),
         AgentTool(agent=time_agent),
+        AgentTool(agent=employee_info_agent),
     ],
 )
