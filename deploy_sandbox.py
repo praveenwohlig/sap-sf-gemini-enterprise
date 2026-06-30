@@ -18,6 +18,7 @@ import os
 import sys
 import subprocess
 from pathlib import Path
+from typing import Any
 from dotenv import load_dotenv
 
 load_dotenv()  # must run before sap_agent is imported (tools_sandbox reads env at module level)
@@ -75,7 +76,7 @@ SF_SANDBOX_HOST    = os.environ["SF_SANDBOX_HOST"]
 SF_SANDBOX_API_KEY = os.environ["SF_SANDBOX_API_KEY"]
 SF_SANDBOX_USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
 
-ENV_VARS = {
+ENV_VARS: dict[str, Any] = {
     "SF_SANDBOX_HOST":    SF_SANDBOX_HOST,
     "SF_SANDBOX_API_KEY": SF_SANDBOX_API_KEY,
     "SF_SANDBOX_USER_ID": SF_SANDBOX_USER_ID,
