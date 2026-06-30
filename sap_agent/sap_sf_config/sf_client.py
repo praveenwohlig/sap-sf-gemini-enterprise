@@ -62,6 +62,8 @@ def odata_get(
         params=params,
         timeout=30,
     )
+    if response.status_code == 404:
+        return []
     response.raise_for_status()
     return response.json().get("d", {}).get("results", [])
 
@@ -85,5 +87,7 @@ def odata_get_single(
         params=params,
         timeout=30,
     )
+    if response.status_code == 404:
+        return {}
     response.raise_for_status()
     return response.json().get("d", {})
