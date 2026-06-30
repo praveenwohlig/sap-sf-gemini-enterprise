@@ -30,13 +30,6 @@ def get_my_employment_termination(user_id: str = None) -> dict:
     data = sf_client.odata_get(
         entity="EmpEmploymentTermination",
         filter=f"userId eq '{uid}'",
-        select=(
-            "personIdExternal,userId,endDate,eventReason,"
-            "lastDateWorked,okToRehire,regretTermination,"
-            "eligibleForSalContinuation,benefitsEndDate,"
-            "salaryEndDate,payrollEndDate,bonusPayExpirationDate,"
-            "notes,lastModifiedDateTime"
-        ),
         top=5,
     )
     return {"employment_termination": data}
@@ -54,10 +47,6 @@ def get_my_pension_payout(user_id: str = None) -> dict:
     data = sf_client.odata_get_single(
         entity="EmpPensionPayout",
         entity_id=uid,
-        select=(
-            "personIdExternal,userId,startDate,endDate,"
-            "plannedEndDate,payrollEndDate,lastModifiedDateTime"
-        ),
     )
     return {"pension_payout": data}
 
@@ -82,11 +71,6 @@ def get_my_work_permits(
     data = sf_client.odata_get(
         entity="EmpWorkPermit",
         filter=filter_expr,
-        select=(
-            "userId,country,documentType,documentNumber,documentTitle,"
-            "issueDate,expirationDate,isValidated,"
-            "issuePlace,issuingAuthority,notes,lastModifiedDateTime"
-        ),
         top=10,
     )
     return {"work_permits": data}
@@ -112,10 +96,6 @@ def get_my_job_relationships(
     data = sf_client.odata_get(
         entity="EmpJobRelationships",
         filter=filter_expr,
-        select=(
-            "userId,relationshipType,startDate,endDate,"
-            "relUserId,operation,lastModifiedDateTime"
-        ),
         top=20,
     )
     return {"job_relationships": data}
@@ -133,10 +113,6 @@ def get_my_hire_date_changes(user_id: str = None) -> dict:
     data = sf_client.odata_get(
         entity="HireDateChange",
         filter=f"usersSysId eq '{uid}'",
-        select=(
-            "code,originalHireDate,newHireDate,processingStatus,"
-            "mdfSystemRecordStatus,usersSysId,lastModifiedDateTime"
-        ),
         top=10,
     )
     return {"hire_date_changes": data}
@@ -153,8 +129,5 @@ def get_my_person_emp_termination_info(user_id: str = None) -> dict:
     uid = user_id or sf_client.USER_ID
     data = sf_client.odata_get_single(
         entity="PersonEmpTerminationInfo", entity_id=uid,
-        select=(
-            "personIdExternal,activeEmploymentsCount,latestTerminationDate"
-        ),
     )
     return {"person_emp_termination_info": data}

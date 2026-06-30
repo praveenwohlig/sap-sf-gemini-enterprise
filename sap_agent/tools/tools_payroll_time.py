@@ -33,11 +33,6 @@ def get_my_job() -> dict:
     data = sf_client.odata_get(
         entity="EmpJob",
         filter=f"userId eq '{sf_client.USER_ID}'",
-        select=(
-            "userId,jobTitle,department,location,startDate,emplStatus,"
-            "position,jobCode,payGrade,payGroup,managerId,companyId,"
-            "businessUnit,division,costCenter,fullPartTime,regularTemp"
-        ),
         top=1,
     )
     return {"job": data}
@@ -50,11 +45,6 @@ def get_my_compensation() -> dict:
     data = sf_client.odata_get(
         entity="EmpCompensation",
         filter=f"userId eq '{sf_client.USER_ID}'",
-        select=(
-            "userId,startDate,endDate,seqNumber,payType,payGrade,payGroup,"
-            "bonusTarget,benefitsRate,isEligibleForBenefits,isEligibleForCar,"
-            "isHighlyCompensatedEmployee,event,eventReason,lastModifiedDateTime"
-        ),
         top=1,
     )
     return {"compensation": data}
@@ -65,10 +55,6 @@ def get_my_pay_components() -> dict:
     data = sf_client.odata_get(
         entity="EmpPayCompRecurring",
         filter=f"userId eq '{sf_client.USER_ID}'",
-        select=(
-            "userId,startDate,endDate,payComponent,payComponentValue,"
-            "currency,frequencyCode,seqNumber,lastModifiedDateTime"
-        ),
         top=20,
     )
     return {"pay_components": data}
@@ -79,10 +65,6 @@ def get_my_beneficiaries() -> dict:
     data = sf_client.odata_get(
         entity="EmpBeneficiary",
         filter=f"userId eq '{sf_client.USER_ID}'",
-        select=(
-            "userId,startDate,endDate,benefitType,firstName,lastName,"
-            "relationship,percentage,lastModifiedDateTime"
-        ),
         top=20,
     )
     return {"beneficiaries": data}
@@ -95,11 +77,6 @@ def get_my_time_off() -> dict:
     data = sf_client.odata_get(
         entity="EmployeeTime",
         filter=f"userId eq '{sf_client.USER_ID}'",
-        select=(
-            "userId,startDate,endDate,timeType,quantityInDays,"
-            "quantityInHours,approvalStatus,deductionQuantity,"
-            "comment,lastModifiedDateTime"
-        ),
         top=10,
     )
     return {"time_off": data}
@@ -110,10 +87,6 @@ def get_my_leave_balance() -> dict:
     data = sf_client.odata_get(
         entity="TimeAccount",
         filter=f"userId eq '{sf_client.USER_ID}'",
-        select=(
-            "userId,timeAccountType,balance,bookingEndDate,"
-            "accountClosed,lastModifiedDateTime"
-        ),
         top=20,
     )
     return {"leave_balances": data}
@@ -126,14 +99,6 @@ def get_my_timesheets() -> dict:
     data = sf_client.odata_get(
         entity="EmployeeTimeSheet",
         filter=f"userId eq '{sf_client.USER_ID}'",
-        select=(
-            "externalCode,userId,startDate,endDate,period,"
-            "approvalStatus,plannedWorkingTime,plannedWorkingTimeInDays,"
-            "plannedHoursAndMinutes,recordedWorkingTime,recordedWorkingTimeInDays,"
-            "recordedHoursAndMinutes,workingTimeAccount,workingTimeAccountHoursAndMinutes,"
-            "timeRecordingMethod,manualEntriesExist,absencesExist,"
-            "editable,lastModifiedDateTime"
-        ),
         top=10,
     )
     return {"timesheets": data}
@@ -141,33 +106,40 @@ def get_my_timesheets() -> dict:
 
 def get_my_timesheet_entries() -> dict:
     """Return the employee's individual timesheet entries (date, time type, start/end time, hours worked)."""
+    sheets = sf_client.odata_get(
+        entity="EmployeeTimeSheet",
+        filter=f"userId eq '{sf_client.USER_ID}'",
+        top=5,
+    )
+    if not sheets:
+        return {"timesheet_entries": []}
+    code = sheets[0].get("externalCode", "")
+    if not code:
+        return {"timesheet_entries": []}
     data = sf_client.odata_get(
         entity="EmployeeTimeSheetEntry",
-        filter=f"EmployeeTimeSheet_externalCode ne ''",
-        select=(
-            "externalCode,EmployeeTimeSheet_externalCode,startDate,"
-            "startTime,endTime,physicalStartDate,physicalEndDate,"
-            "timeType,timeTypeName,quantityInHours,quantityInHoursAndMinutes,"
-            "durationInDays,costCenter,approvalStatus,timeRecordOrigin,"
-            "lastModifiedDateTime"
-        ),
-        top=20,
+        filter=f"EmployeeTimeSheet_externalCode eq '{code}'",
+        top=50,
     )
     return {"timesheet_entries": data}
 
 
 def get_my_time_valuation() -> dict:
     """Return the employee's time valuation results (hours valued, pay type, allowance type, posting target)."""
+    sheets = sf_client.odata_get(
+        entity="EmployeeTimeSheet",
+        filter=f"userId eq '{sf_client.USER_ID}'",
+        top=5,
+    )
+    if not sheets:
+        return {"time_valuation": []}
+    code = sheets[0].get("externalCode", "")
+    if not code:
+        return {"time_valuation": []}
     data = sf_client.odata_get(
         entity="EmployeeTimeValuationResult",
-        filter=f"EmployeeTimeSheet_externalCode ne ''",
-        select=(
-            "externalCode,EmployeeTimeSheet_externalCode,bookingDate,"
-            "hours,hoursAndMinutes,allowanceType,approvalStatus,"
-            "payTypeName,payTypeExternalName,postingTarget,"
-            "timeTypeGroup,costCenter,lastModifiedDateTime"
-        ),
-        top=20,
+        filter=f"EmployeeTimeSheet_externalCode eq '{code}'",
+        top=50,
     )
     return {"time_valuation": data}
 
@@ -177,10 +149,6 @@ def get_my_time_collector() -> dict:
     data = sf_client.odata_get(
         entity="TimeCollector",
         filter=f"userId eq '{sf_client.USER_ID}'",
-        select=(
-            "externalCode,userId,timeCollectorType,startDate,endDate,"
-            "bookingDate,collectorValue,changeValue,lastModifiedDateTime"
-        ),
         top=20,
     )
     return {"time_collectors": data}
@@ -191,12 +159,6 @@ def get_my_time_recordings() -> dict:
     data = sf_client.odata_get(
         entity="TimeRecording",
         filter=f"userId eq '{sf_client.USER_ID}'",
-        select=(
-            "externalCode,userId,date,startTime,endTime,"
-            "physicalStartDate,physicalEndDate,timeType,"
-            "durationInMinutes,durationInDays,costCenter,"
-            "approvalPeriodStatus,timeRecordOrigin,lastModifiedDateTime"
-        ),
         top=20,
     )
     return {"time_recordings": data}
@@ -207,11 +169,6 @@ def get_my_allowance_recordings() -> dict:
     data = sf_client.odata_get(
         entity="AllowanceRecording",
         filter=f"userId eq '{sf_client.USER_ID}'",
-        select=(
-            "externalCode,userId,date,allowanceType,value,"
-            "costCenter,approvalPeriodStatus,pendingCancellation,"
-            "lastModifiedDateTime"
-        ),
         top=20,
     )
     return {"allowance_recordings": data}
@@ -222,10 +179,6 @@ def get_my_external_allowances() -> dict:
     data = sf_client.odata_get(
         entity="ExternalAllowance",
         filter=f"userId eq '{sf_client.USER_ID}'",
-        select=(
-            "externalCode,userId,date,allowanceType,value,"
-            "costCenter,status,lastModifiedDateTime"
-        ),
         top=20,
     )
     return {"external_allowances": data}
@@ -236,11 +189,6 @@ def get_my_external_time_data() -> dict:
     data = sf_client.odata_get(
         entity="ExternalTimeData",
         filter=f"userId eq '{sf_client.USER_ID}'",
-        select=(
-            "externalCode,userId,startDate,endDate,startTime,endTime,"
-            "timeType,hours,costCenter,status,category,"
-            "externalApprovalStatus,lastModifiedDateTime"
-        ),
         top=20,
     )
     return {"external_time_data": data}
