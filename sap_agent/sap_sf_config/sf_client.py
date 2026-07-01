@@ -14,16 +14,14 @@ Common query options exposed:
 ══════════════════════════════════════════════════════════════
 """
 
-import os
-import requests
-from typing import Optional
 import os, functools, requests
+from typing import Optional
 from google.adk.tools import ToolContext
-from google.cloud import secretmanager
+# from google.cloud import secretmanager  # uncomment when deploying PROD (needs google-cloud-secret-manager)
 
 HOST    = os.environ["SF_SANDBOX_HOST"]
 API_KEY = os.environ["SF_SANDBOX_API_KEY"]
-USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
+USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103032")
 
 
 # PROD
@@ -59,6 +57,35 @@ USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
 #     token = sf_auth.get_user_token(sf_user, HOST, COMPANY_ID, CLIENT_ID,
 #                                    _private_key(), ISSUER)
 #     return sf_user, token
+
+
+# ── OAuth identity resolution ─────────────────────────────────────────────────
+AUTH_ID  = os.environ.get("SF_AUTH_ID", "")
+USERINFO = "https://openidconnect.googleapis.com/v1/userinfo"
+
+# username (part before @wohlig.com) → SAP SF userId
+USER_MAP: dict[str, str] = {
+    "vamsi.padmaraju": "100602",
+    # "praveen.kumar":   "<SF_USER_ID>",
+}
+
+
+def resolve_user_id(tool_context) -> str:
+    """Return the caller's SF user ID from their Google OAuth token, or the env fallback."""
+    import logging
+    log = logging.getLogger(__name__)
+
+    email = tool_context.user_id
+
+    if not email:
+        log.warning("[DEBUG] No email found, using fallback USER_ID")
+        return USER_ID
+    
+    username = email.lower().split("@")[0]
+    sf_id = USER_MAP.get(username)
+    if not sf_id:
+        raise PermissionError(f"User '{username}' is not mapped to any SAP SF account.")
+    return sf_id
 
 
 def _auth_headers() -> dict:
@@ -100,7 +127,7 @@ def odata_get(
         params=params,
         timeout=30,
     )
-    if response.status_code == 404:
+    if response.status_code in (400, 404):
         return []
     response.raise_for_status()
     return response.json().get("d", {}).get("results", [])
@@ -125,7 +152,7 @@ def odata_get_single(
         params=params,
         timeout=30,
     )
-    if response.status_code == 404:
+    if response.status_code in (400, 404):
         return {}
     response.raise_for_status()
     return response.json().get("d", {})

@@ -5,11 +5,17 @@ Root Orchestrator — SAP SuccessFactors HR Assistant
 
 Routes incoming questions to the correct domain subagent:
 
-  identity_agent  — profile, contact, IDs, org chart
-  career_agent    — education, work history, skills, awards
-  payroll_agent   — job info, compensation, pay components
-  time_agent      — timesheets, leave, recordings, allowances
+  identity_agent      — profile, contact, IDs, org chart
+  career_agent        — education, work history, skills, awards
+  payroll_agent       — job info, compensation, pay components
+  time_agent          — timesheets, leave, recordings, allowances
   compensation_agent  — deductions, compensation info, pay components
+
+User identity is resolved per tool call via tool_context.user_id:
+  Each tool calls sf_client.resolve_user_id(tool_context) which reads
+  tool_context.user_id (the authenticated user's email from Gemini
+  Enterprise) and maps it to a SAP SF user ID via USER_MAP in sf_client.
+  Fallback: SF_SANDBOX_USER_ID env var (used locally / sandbox).
 
 The orchestrator never calls SAP APIs directly.
 It analyses the intent and delegates to the right specialist.

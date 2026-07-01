@@ -74,12 +74,14 @@ STAGING_BUCKET = _resolve_bucket(os.environ.get("GCS_BUCKET", ""))
 # ── Sandbox credentials (read from .env) ──────────────────────
 SF_SANDBOX_HOST    = os.environ["SF_SANDBOX_HOST"]
 SF_SANDBOX_API_KEY = os.environ["SF_SANDBOX_API_KEY"]
-SF_SANDBOX_USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
+SF_SANDBOX_USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103032")
+SF_AUTH_ID         = os.environ.get("SF_AUTH_ID", "")
 
 ENV_VARS: dict[str, Any] = {
     "SF_SANDBOX_HOST":    SF_SANDBOX_HOST,
     "SF_SANDBOX_API_KEY": SF_SANDBOX_API_KEY,
     "SF_SANDBOX_USER_ID": SF_SANDBOX_USER_ID,
+    "SF_AUTH_ID":         SF_AUTH_ID,
 }
 
 
@@ -91,28 +93,23 @@ def main():
 
     vertexai.init(project=PROJECT_ID, location=LOCATION, staging_bucket=STAGING_BUCKET)
 
-    existing_resource = RESOURCE_NAME_FILE.read_text().strip() if RESOURCE_NAME_FILE.exists() else None
+    if not RESOURCE_NAME_FILE.exists():
+        print(f"ERROR: No resource file found for '{AGENT_DISPLAY_NAME}'.")
+        print(f"Expected: {RESOURCE_NAME_FILE}")
+        print("To create a new agent for the first time, run:")
+        print(f"  python deploy_sandbox.py {AGENT_DISPLAY_NAME} --create")
+        sys.exit(1)
 
-    if existing_resource:
-        print(f"Updating existing agent: {existing_resource}")
-        remote_app = agent_engines.get(existing_resource)
-        remote_app.update(
-            agent_engine=root_agent,
-            display_name=AGENT_DISPLAY_NAME,
-            requirements=REQUIREMENTS,
-            extra_packages=EXTRA_PACKAGES,
-            env_vars=ENV_VARS,
-        )
-    else:
-        print("Creating new agent...")
-        remote_app = agent_engines.create(
-            agent_engine=root_agent,
-            display_name=AGENT_DISPLAY_NAME,
-            requirements=REQUIREMENTS,
-            extra_packages=EXTRA_PACKAGES,
-            env_vars=ENV_VARS,
-        )
-        RESOURCE_NAME_FILE.write_text(remote_app.resource_name)
+    existing_resource = RESOURCE_NAME_FILE.read_text().strip()
+    print(f"Updating existing agent: {existing_resource}")
+    remote_app = agent_engines.get(existing_resource)
+    remote_app.update(
+        agent_engine=root_agent,
+        display_name=AGENT_DISPLAY_NAME,
+        requirements=REQUIREMENTS,
+        extra_packages=EXTRA_PACKAGES,
+        env_vars=ENV_VARS,
+    )
 
     print("\n" + "=" * 55)
     print("  Deployment complete!")
