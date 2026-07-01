@@ -15,18 +15,19 @@ Field lists match the ECEmploymentInformation OData spec ($select enums).
 ══════════════════════════════════════════════════════════════
 """
 
+from google.adk.tools import ToolContext
 from ..sap_sf_config import sf_client
 
 
 # ── EmpEmploymentTermination ──────────────────────────────────────────────────
 
-def get_my_employment_termination(user_id: str | None = None) -> dict:
+def get_my_employment_termination(tool_context: ToolContext) -> dict:
     """Return the employee's employment termination details (end date, event reason, rehire eligibility, benefit end dates).
 
     Args:
         user_id: Employee user ID to look up. Defaults to the logged-in user.
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     data = sf_client.odata_get(
         entity="EmpEmploymentTermination",
         filter=f"userId eq '{uid}'",
@@ -37,13 +38,13 @@ def get_my_employment_termination(user_id: str | None = None) -> dict:
 
 # ── EmpPensionPayout ──────────────────────────────────────────────────────────
 
-def get_my_pension_payout(user_id: str | None = None) -> dict:
+def get_my_pension_payout(tool_context: ToolContext) -> dict:
     """Return the employee's pension payout information (payout schedule, planned end date, payroll end date).
 
     Args:
         user_id: Employee user ID to look up. Defaults to the logged-in user.
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     data = sf_client.odata_get_single(
         entity="EmpPensionPayout",
         entity_id=uid,
@@ -54,16 +55,15 @@ def get_my_pension_payout(user_id: str | None = None) -> dict:
 # ── EmpWorkPermit ─────────────────────────────────────────────────────────────
 
 def get_my_work_permits(
-    user_id: str | None = None,
+    tool_context: ToolContext,
     country: str | None = None,
 ) -> dict:
     """Return the employee's work permit records (country, document type/number/title, issue/expiration dates, issuing authority).
 
     Args:
-        user_id: Employee user ID to look up. Defaults to the logged-in user.
         country: Filter by country code, e.g. 'USA' (optional).
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     filter_expr = f"userId eq '{uid}'"
     if country:
         filter_expr += f" and country eq '{country}'"
@@ -79,16 +79,15 @@ def get_my_work_permits(
 # ── EmpJobRelationships ───────────────────────────────────────────────────────
 
 def get_my_job_relationships(
-    user_id: str | None = None,
+    tool_context: ToolContext,
     relationship_type: str | None = None,
 ) -> dict:
     """Return the employee's job relationship records (relationship type, related user ID, effective dates, operation).
 
     Args:
-        user_id:           Employee user ID to look up. Defaults to the logged-in user.
         relationship_type: Filter by type, e.g. 'hr manager' (optional).
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     filter_expr = f"userId eq '{uid}'"
     if relationship_type:
         filter_expr += f" and relationshipType eq '{relationship_type}'"
@@ -103,13 +102,13 @@ def get_my_job_relationships(
 
 # ── HireDateChange ────────────────────────────────────────────────────────────
 
-def get_my_hire_date_changes(user_id: str | None = None) -> dict:
+def get_my_hire_date_changes(tool_context: ToolContext) -> dict:
     """Return the employee's hire date change records (original hire date, new hire date, processing status, record status).
 
     Args:
         user_id: Employee user ID to look up. Defaults to the logged-in user.
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     data = sf_client.odata_get(
         entity="HireDateChange",
         filter=f"usersSysId eq '{uid}'",
@@ -120,13 +119,13 @@ def get_my_hire_date_changes(user_id: str | None = None) -> dict:
 
 # ── PersonEmpTerminationInfo ──────────────────────────────────────────────────
 
-def get_my_person_emp_termination_info(user_id: str | None = None) -> dict:
+def get_my_person_emp_termination_info(tool_context: ToolContext) -> dict:
     """Return the person-level termination summary (active employment count, latest termination date).
 
     Args:
         user_id: Employee's personIdExternal to look up. Defaults to the logged-in user.
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     data = sf_client.odata_get_single(
         entity="PersonEmpTerminationInfo", entity_id=uid,
     )

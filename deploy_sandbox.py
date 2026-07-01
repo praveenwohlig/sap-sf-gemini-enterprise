@@ -77,9 +77,14 @@ SF_SANDBOX_API_KEY = os.environ["SF_SANDBOX_API_KEY"]
 SF_SANDBOX_USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
 
 ENV_VARS: dict[str, Any] = {
-    "SF_SANDBOX_HOST":    SF_SANDBOX_HOST,
-    "SF_SANDBOX_API_KEY": SF_SANDBOX_API_KEY,
-    "SF_SANDBOX_USER_ID": SF_SANDBOX_USER_ID,
+    "SF_SANDBOX_HOST":          SF_SANDBOX_HOST,
+    "SF_SANDBOX_API_KEY":       SF_SANDBOX_API_KEY,
+    "SF_SANDBOX_USER_ID":       SF_SANDBOX_USER_ID,
+    "SF_SANDBOX_EMAIL":         os.environ.get("SF_SANDBOX_EMAIL", ""),
+    "AUTH_MODE":                os.environ.get("AUTH_MODE", "sandbox"),
+    "SF_AUTH_ID":               os.environ.get("SF_AUTH_ID", "google-oauth"),
+    "GOOGLE_OAUTH_CLIENT_ID":   os.environ.get("GOOGLE_OAUTH_CLIENT_ID", ""),
+    "GOOGLE_OAUTH_CLIENT_SECRET": os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", ""),
 }
 
 

@@ -3,62 +3,70 @@ sf_client.py
 ══════════════════════════════════════════════════════════════
 SAP SuccessFactors OData v2 HTTP client.
 
-Connection config is read once from environment variables:
-  SF_SANDBOX_HOST     — base URL
-  SF_SANDBOX_API_KEY  — APIKey header value (sandbox / API Hub)
-  SF_SANDBOX_USER_ID  — default employee user ID (fallback: 103075)
+Auth modes (set AUTH_MODE in .env):
+  sandbox    — uses APIKey header + EMAIL_USER_MAP for userId
+  production — uses Google OAuth token from Gemini Enterprise
+               → calls UserInfo → maps email → SF userId
 
-Common query options exposed:
-  select, filter, expand, orderby, top, skip,
-  from_date / to_date  (SAP effective-date range params)
+Environment variables:
+  AUTH_MODE           — "sandbox" or "production"
+  SF_SANDBOX_HOST     — SF base URL
+  SF_SANDBOX_API_KEY  — sandbox APIKey
+  SF_SANDBOX_USER_ID  — fallback userId if email not in map
+  SF_AUTH_ID          — Gemini Enterprise authorization ID (production)
 ══════════════════════════════════════════════════════════════
 """
 
 import os
+import sys
 import requests
 from typing import Optional
-import os, functools, requests
 from google.adk.tools import ToolContext
-from google.cloud import secretmanager
-
-HOST    = os.environ["SF_SANDBOX_HOST"]
-API_KEY = os.environ["SF_SANDBOX_API_KEY"]
-USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "103075")
 
 
-# PROD
-# HOST = os.environ["SF_HOST"]
-# COMPANY_ID = os.environ["SF_COMPANY_ID"]
-# CLIENT_ID = os.environ["SF_CLIENT_ID"]
-# ISSUER = os.environ["SF_SAML_ISSUER"]
-# KEY_SECRET = os.environ["SF_PRIVATE_KEY_SECRET"]
-# AUTH_ID = os.environ["SF_AUTH_ID"]  # must match the authorization id set in Step 8
-# USERINFO = "https://openidconnect.googleapis.com/v1/userinfo"
+def _log(msg: str) -> None:
+    print(msg, file=sys.stderr, flush=True)
 
-# def _private_key():
-#     client = secretmanager.SecretManagerServiceClient()
-#     return client.access_secret_version(name=KEY_SECRET).payload.data.decode()
+HOST     = os.environ["SF_SANDBOX_HOST"]
+API_KEY  = os.environ["SF_SANDBOX_API_KEY"]
+AUTH_MODE = os.environ.get("AUTH_MODE", "sandbox")
+AUTH_ID  = os.environ.get("SF_AUTH_ID", "google_oauth")
+USERINFO = "https://openidconnect.googleapis.com/v1/userinfo"
 
-# def _caller_email(tool_context: ToolContext) -> str:
-#     # Gemini Enterprise forwards the consented user OAuth token when the agent is
-#     # registered with an authorization. It is keyed by the authorization id.
-#     token = tool_context.state.get(f"temp:{AUTH_ID}")
-#     if not token:
-#         raise PermissionError("No user authorization present in the session.")
-#     r = requests.get(USERINFO, headers={"Authorization": f"Bearer {token}"}, timeout=10)
-#     r.raise_for_status()
-#     return r.json()["email"]
 
-# def _sf_user_id(email: str) -> str:
-#     # Map the corporate email to the SuccessFactors user id. Replace with your
-#     # directory lookup or a one time admin query on the User entity by email.
-#     return email.split("@")[0]
+# ── Email → SF userId map ─────────────────────────────────────
+# Add every team member here: email prefix → SF test userId
+EMAIL_USER_MAP = {
+    "praveen.kumar":   "106002",
+    "vamsi.padmaraju": "103032",
+}
 
-# def _token_for(tool_context: ToolContext) -> tuple:
-#     sf_user = _sf_user_id(_caller_email(tool_context))
-#     token = sf_auth.get_user_token(sf_user, HOST, COMPANY_ID, CLIENT_ID,
-#                                    _private_key(), ISSUER)
-#     return sf_user, token
+USER_ID = os.environ.get("SF_SANDBOX_USER_ID", "106002")  # sandbox default
+
+
+def get_user_id(tool_context: ToolContext) -> str:
+    """
+    Resolve the SF userId for the currently logged-in user.
+
+    Sandbox : reads EMAIL_USER_MAP using SF_SANDBOX_USER_ID as fallback.
+    Production: reads the Google OAuth token Gemini Enterprise forwards
+                via tool_context, calls UserInfo to get the email, then
+                maps email prefix → SF userId via EMAIL_USER_MAP.
+    """
+    if AUTH_MODE == "production":
+        # Gemini Enterprise injects the signed-in user's email via tool_context.user_id
+        email = tool_context.user_id or ""
+        _log(f"[DEBUG] production email from user_id={email!r}")
+    else:
+        email = os.environ.get("SF_SANDBOX_EMAIL", "")
+
+    if email:
+        name = email.split("@")[0].lower()
+        uid = EMAIL_USER_MAP.get(name, USER_ID)
+        _log(f"[DEBUG] name={name!r} -> uid={uid}")
+        return uid
+
+    return USER_ID
 
 
 def _auth_headers() -> dict:

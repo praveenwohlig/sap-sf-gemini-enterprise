@@ -18,6 +18,7 @@ Field lists and filter patterns follow the ECCompensation OData spec.
 ══════════════════════════════════════════════════════════════
 """
 
+from google.adk.tools import ToolContext
 from ..sap_sf_config import sf_client
 
 
@@ -34,13 +35,13 @@ def get_deduction_screen_ids() -> dict:
 
 # ── OneTimeDeduction ──────────────────────────────────────────────────────────
 
-def get_my_one_time_deductions(user_id: str | None = None) -> dict:
+def get_my_one_time_deductions(tool_context: ToolContext) -> dict:
     """Return the employee's non-recurring (one-time) deduction records.
 
     Args:
         user_id: Employee user ID to look up. Defaults to the logged-in user.
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     data = sf_client.odata_get(
         entity="OneTimeDeduction",
         filter=f"userSysId eq '{uid}'",
@@ -51,13 +52,13 @@ def get_my_one_time_deductions(user_id: str | None = None) -> dict:
 
 # ── RecurringDeduction ────────────────────────────────────────────────────────
 
-def get_my_recurring_deductions(user_id: str | None = None) -> dict:
+def get_my_recurring_deductions(tool_context: ToolContext) -> dict:
     """Return the employee's recurring deduction records, including individual deduction items.
 
     Args:
         user_id: Employee user ID to look up. Defaults to the logged-in user.
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     data = sf_client.odata_get(
         entity="RecurringDeduction",
         filter=f"userSysId eq '{uid}'",
@@ -69,13 +70,13 @@ def get_my_recurring_deductions(user_id: str | None = None) -> dict:
 
 # ── RecurringDeductionItem ────────────────────────────────────────────────────
 
-def get_my_recurring_deduction_items(user_id: str | None = None) -> dict:
+def get_my_recurring_deduction_items(tool_context: ToolContext) -> dict:
     """Return the employee's individual recurring deduction line items.
 
     Args:
         user_id: Employee user ID to look up. Defaults to the logged-in user.
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     data = sf_client.odata_get(
         entity="RecurringDeductionItem",
         filter=f"RecurringDeduction_userSysId eq '{uid}'",
@@ -87,18 +88,17 @@ def get_my_recurring_deduction_items(user_id: str | None = None) -> dict:
 # ── EmpCompensation ───────────────────────────────────────────────────────────
 
 def get_my_compensation(
-    user_id: str | None = None,
+    tool_context: ToolContext,
     from_date: str | None = None,
     to_date: str | None = None,
 ) -> dict:
     """Return the employee's compensation information (pay grade, bonus target, benefits eligibility).
 
     Args:
-        user_id:   Employee user ID to look up. Defaults to the logged-in user.
         from_date: Start of effective date range in YYYY-MM-DD format (optional).
         to_date:   End of effective date range in YYYY-MM-DD format (optional).
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     data = sf_client.odata_get(
         entity="EmpCompensation",
         filter=f"userId eq '{uid}' and effectiveLatestChange eq true",
@@ -111,13 +111,13 @@ def get_my_compensation(
 
 # ── EmpCompensationCalculated ─────────────────────────────────────────────────
 
-def get_my_compensation_calculated(user_id: str | None = None) -> dict:
+def get_my_compensation_calculated(tool_context: ToolContext) -> dict:
     """Return the employee's calculated compensation values (Compa-Ratio, Range Penetration).
 
     Args:
         user_id: Employee user ID to look up. Defaults to the logged-in user.
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     data = sf_client.odata_get(
         entity="EmpCompensation",
         filter=f"userId eq '{uid}'",
@@ -130,16 +130,15 @@ def get_my_compensation_calculated(user_id: str | None = None) -> dict:
 # ── EmpCompensationGroupSumCalculated ─────────────────────────────────────────
 
 def get_my_compensation_group_sum(
-    user_id: str | None = None,
+    tool_context: ToolContext,
     start_date: str | None = None,
 ) -> dict:
     """Return the employee's calculated pay component group sums from compensation information.
 
     Args:
-        user_id:    Employee user ID to look up. Defaults to the logged-in user.
         start_date: Effective start date of the compensation record in YYYY-MM-DD format (optional).
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     filter_expr = f"userId eq '{uid}'"
     if start_date:
         filter_expr += f" and startDate eq datetime'{start_date}T00:00:00'"
@@ -156,16 +155,15 @@ def get_my_compensation_group_sum(
 # ── EmpPayCompNonRecurring ────────────────────────────────────────────────────
 
 def get_my_pay_components_non_recurring(
-    user_id: str | None = None,
+    tool_context: ToolContext,
     pay_component_code: str | None = None,
 ) -> dict:
     """Return the employee's non-recurring (one-time) pay component records (bonuses, spot awards).
 
     Args:
-        user_id:            Employee user ID to look up. Defaults to the logged-in user.
         pay_component_code: Filter by a specific pay component code (optional).
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     filter_expr = f"userId eq '{uid}'"
     if pay_component_code:
         filter_expr += f" and payComponentCode eq '{pay_component_code}'"
@@ -181,7 +179,7 @@ def get_my_pay_components_non_recurring(
 # ── EmpPayCompRecurring ───────────────────────────────────────────────────────
 
 def get_my_pay_components_recurring(
-    user_id: str | None = None,
+    tool_context: ToolContext,
     from_date: str | None = None,
     to_date: str | None = None,
     pay_component: str | None = None,
@@ -189,12 +187,11 @@ def get_my_pay_components_recurring(
     """Return the employee's recurring pay component records (base salary, allowances).
 
     Args:
-        user_id:       Employee user ID to look up. Defaults to the logged-in user.
         from_date:     Start of effective date range in YYYY-MM-DD format (optional).
         to_date:       End of effective date range in YYYY-MM-DD format (optional).
         pay_component: Filter by a specific pay component, e.g. 'Base Salary' (optional).
     """
-    uid = user_id or sf_client.USER_ID
+    uid = sf_client.get_user_id(tool_context)
     filter_expr = f"userId eq '{uid}' and effectiveLatestChange eq true"
     if pay_component:
         filter_expr += f" and payComponent eq '{pay_component}'"
